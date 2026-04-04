@@ -3,7 +3,13 @@ use crate::signal::*;
 
 pub struct MyAlgo;
 
-#[register_algorithm]
+impl Default for MyAlgo {
+    fn default() -> Self {
+        Self
+    }
+}
+
+#[register_algorithm(default)]
 impl StockTrekAlgorithm for MyAlgo {
     fn create_signal(&self, context: StockTrekContext) -> StockTrekSignal {
         StockTrekSignal::builder()

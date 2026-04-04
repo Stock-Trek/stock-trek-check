@@ -28,7 +28,7 @@ stock-trek also provides Python bindings which can be installed via
 
 ## Usage
 
-Implement the ```StockTrekAlgorithm``` trait and register it with the annotation `#[register_algorithm]`:
+Implement the `StockTrekAlgorithm` and `Default` traits for your algorithm and register it with the annotation `#[register_algorithm(default)]`:
 
 ```rs
 use stock_trek::prelude::*;
@@ -36,7 +36,13 @@ use stock_trek::signal::*;
 
 pub struct MyAlgo;
 
-#[register_algorithm]
+impl Default for MyAlgo {
+    fn default() -> Self {
+        Self
+    }
+}
+
+#[register_algorithm(default)]
 impl StockTrekAlgorithm for MyAlgo {
     fn create_signal(&self, context: StockTrekContext) -> StockTrekSignal {
         StockTrekSignal::builder()
