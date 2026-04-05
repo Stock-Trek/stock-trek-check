@@ -1,17 +1,14 @@
-use crate::{
-    exchange::{Exchange, ExchangeName},
-    statistics::stats::Stats,
-};
+use crate::{exchange::Exchange, statistics::stats::Stats};
 use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct StockTrekContext {
-    exchanges: HashMap<ExchangeName, Exchange>,
+    exchanges: HashMap<String, Exchange>,
     pub stats: Stats,
 }
 
 impl StockTrekContext {
-    pub fn exchanges(&self) -> &HashMap<ExchangeName, Exchange> {
+    pub fn exchanges(&self) -> &HashMap<String, Exchange> {
         &self.exchanges
     }
 }

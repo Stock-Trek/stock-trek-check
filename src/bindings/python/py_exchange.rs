@@ -2,43 +2,13 @@
 use {
     crate::{
         bindings::python::{market_data::py_market::PyMarket, py_trading_pair::PyTradingPair},
-        exchange::{Exchange, ExchangeName},
+        exchange::Exchange,
     },
     pyo3::{prelude::*, types::PyDict},
 };
 
 #[cfg(feature = "python")]
-#[pyclass(name = "RollingWindow")]
-pub struct PyExchangeName {
-    inner: ExchangeName,
-}
-
-#[cfg(feature = "python")]
-#[pymethods]
-impl PyExchangeName {
-    pub const BINANCE: Self = Self {
-        inner: ExchangeName::Binance,
-    };
-}
-
-#[cfg(feature = "python")]
-impl From<&PyExchangeName> for ExchangeName {
-    fn from(py: &PyExchangeName) -> Self {
-        py.inner
-    }
-}
-
-#[cfg(feature = "python")]
-impl From<&ExchangeName> for PyExchangeName {
-    fn from(inner: &ExchangeName) -> Self {
-        Self {
-            inner: inner.clone(),
-        }
-    }
-}
-
-#[cfg(feature = "python")]
-#[pyclass(name = "StockTrekContext", from_py_object)]
+#[pyclass(name = "Exchange", from_py_object)]
 #[derive(Clone)]
 pub struct PyExchange {
     inner: Exchange,

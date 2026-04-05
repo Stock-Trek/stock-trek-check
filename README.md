@@ -17,7 +17,7 @@ Add to your Cargo.toml:
 
 ```rs
 [dependencies]
-stock-trek = "0.2.8"
+stock-trek = "0.2.9"
 ```
 
 ## Python Bindings
