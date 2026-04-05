@@ -24,8 +24,8 @@ impl MarketOrderBook {
 impl From<RawMarketOrderBook> for MarketOrderBook {
     fn from(value: RawMarketOrderBook) -> Self {
         let RawMarketOrderBook { bids, asks } = value;
-        let exact_bids = bids.into_iter().map(|bid| MarketQuote::from(bid)).collect();
-        let exact_asks = asks.into_iter().map(|ask| MarketQuote::from(ask)).collect();
+        let exact_bids = bids.into_iter().map(MarketQuote::from).collect();
+        let exact_asks = asks.into_iter().map(MarketQuote::from).collect();
         MarketOrderBook {
             exact_bids,
             exact_asks,

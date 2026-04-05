@@ -14,5 +14,5 @@ pub fn quote_to_f64(quote: &MarketQuote) -> (f64, f64) {
 }
 
 pub fn vec_quote_to_f64(vec: &[MarketQuote]) -> Vec<(f64, f64)> {
-    vec.iter().map(|quote| quote_to_f64(quote)).collect()
+    vec.iter().map(quote_to_f64).collect()
 }
