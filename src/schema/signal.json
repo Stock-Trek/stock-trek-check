@@ -201,6 +201,10 @@
         },
         "creator": {
           "type": "string"
+        },
+        "creation_date": {
+          "type": "string",
+          "format": "date-time"
         }
       },
       "additionalProperties": false,
@@ -208,7 +212,8 @@
         "generator_id",
         "name",
         "version",
-        "creator"
+        "creator",
+        "creation_date"
       ]
     },
     "provenance": {

@@ -1,6 +1,6 @@
 [package]
 name = "stock-trek"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 description = "Stock Trek time-series analysis"
 authors = ["stock-trek.com <stock-trek@proton.me>"]
@@ -20,6 +20,7 @@ name = "stock_trek"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+chrono = { version = "0.4", features = ["serde"] }
 larpa = "0.1.1"
 num-complex = "0.4.6"
 proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
