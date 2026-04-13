@@ -1,0 +1,2 @@
+Read the GitHub issue, comment and request type and address the issue.
+Then respond with a summary that can be used in a pull request.

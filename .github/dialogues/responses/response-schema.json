@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "responseType": {
+      "enum": [
+        "ALREADY_ADDRESSED",
+        "REQUIRES_HUMAN",
+        "REQUIRES_MORE_INFORMATION",
+        "CAN_ADDRESS_FULLY"
+      ]
+    },
+    "codeChangesRequired": {
+      "type": "boolean"
+    },
+    "extraInformationRequired": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 0,
+      "uniqueItems": true,
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "responseType",
+    "codeChangesRequired",
+    "extraInformationRequired"
+  ]
+}

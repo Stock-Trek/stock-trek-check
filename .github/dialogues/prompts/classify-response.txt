@@ -1,0 +1,4 @@
+Read the GitHub issue, comment and request type and classify our response.
+1. Has this request already been addressed, or is a human needed to address this request, or can I address this request either partially or completely?
+2. Are any code changes required to address this request?
+3. If I can address this request but require more information to complete it, list all the extra information needed before this request can be fully addressed, one question per element.
