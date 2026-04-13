@@ -19,6 +19,11 @@ jobs:
     outputs:
       issue-branch-base: ${{ steps.gather-branches.outputs.issue-branch-base }}
       issue-branch: ${{ steps.gather-branches.outputs.issue-branch }}
+      address-issue-base64: ${{ steps.prompts.outputs.address-issue-base64 }}
+      are-code-changes-required-base64: ${{ steps.prompts.outputs.are-code-changes-required-base64 }}
+      classify-request-base64: ${{ steps.prompts.outputs.classify-request-base64 }}
+      classify-response-base64: ${{ steps.prompts.outputs.classify-response-base64 }}
+      extra-information-required-base64: ${{ steps.prompts.outputs.extra-information-required-base64 }}
       issue-context-base64: ${{ steps.gather-context.outputs.context-base64 }}
       request-type: ${{ steps.save-request-type.outputs.request-type }}
     env:
@@ -41,6 +46,15 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           issue-branch-base: master
+
+      - name: Save base64 prompts
+        id: prompts
+        run: |
+          echo "address-issue-base64=$(cat .github/prompts/address-issue.txt | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "are-code-changes-required-base64=$(cat .github/prompts/are-code-changes-required.txt | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "classify-request-base64=$(cat .github/prompts/classify-request.txt | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "classify-response-base64=$(cat .github/prompts/classify-response.txt | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "extra-information-required-base64=$(cat .github/prompts/extra-information-required.txt | base64 -w 0)" >> $GITHUB_OUTPUT
 
       - name: Get last 20 comments
         id: gather-context
@@ -79,27 +93,17 @@ jobs:
         with:
           api-key: ${{ secrets.DEEPSEEK_API_KEY }}
 
-      - name: Create pi inputs for classifying request
-        id: pi-inputs-request
-        run: |
-          PROMPT_BASE64=$(cat .github/dialogues/prompts/classify-request.txt | base64 -w 0)
-          SCHEMA_BASE64=$(cat .github/dialogues/responses/request-schema.json | jq -c | base64 -w 0)
-          echo "prompt-base64=${PROMPT_BASE64}" >> $GITHUB_OUTPUT
-          echo "schema-base64=${SCHEMA_BASE64}" >> $GITHUB_OUTPUT
-
       - name: Classify request
         id: classify-request
         uses: ./.github/actions/invoke-pi
         with:
           context-base64: ${{ steps.gather-context.outputs.context-base64 }}
-          prompt-base64: ${{ steps.pi-inputs-request.outputs.prompt-base64 }}
-          schema-base64: ${{ steps.pi-inputs-request.outputs.schema-base64 }}
+          prompt-base64: ${{ steps.prompts.outputs.classify-request-base64 }}
 
       - name: Save request type
         id: save-request-type
         run: |
-          PI_RESPONSE=$(echo "${{ steps.classify-request.outputs.response-base64 }}" | base64 -d | jq .)
-          REQUEST_TYPE=$(jq -r '.requestType' <<< "${PI_RESPONSE}")
+          REQUEST_TYPE=$(echo "${{ steps.classify-request.outputs.response-base64 }}" | base64 -d)
           echo "request-type: ${REQUEST_TYPE}"
           echo "request-type=${REQUEST_TYPE}" >> $GITHUB_OUTPUT
 
@@ -127,11 +131,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Thumbs down
+      - name: React confused
         uses: ./.github/actions/emoji-react
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -146,12 +151,12 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `I'm sorry I wasn't able to understand the issue type. If it's one of [BUG, FEATURE, QUESTION] please mention it specifically.`
+              body: `I'm sorry I wasn't able to understand the issue type. If it's either a question or code change please mention it specifically.`
             });
 
   respond:
     needs: [triage]
-    if: (needs.triage.outputs.request-type == 'BUG') || (needs.triage.outputs.request-type == 'FEATURE') || (needs.triage.outputs.request-type == 'QUESTION')
+    if: (needs.triage.outputs.request-type == 'CODE_CHANGE') || (needs.triage.outputs.request-type == 'QUESTION')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -176,46 +181,59 @@ jobs:
         with:
           api-key: ${{ secrets.DEEPSEEK_API_KEY }}
 
-      - name: Create pi inputs for classifying response
-        id: pi-inputs-response
-        run: |
-          PROMPT_BASE64=$(cat .github/dialogues/prompts/classify-response.txt | base64 -w 0)
-          SCHEMA_BASE64=$(cat .github/dialogues/responses/response-schema.json | jq -c | base64 -w 0)
-          echo "prompt-base64=${PROMPT_BASE64}" >> $GITHUB_OUTPUT
-          echo "schema-base64=${SCHEMA_BASE64}" >> $GITHUB_OUTPUT
-
       - name: Classify response
         id: classify-response
         uses: ./.github/actions/invoke-pi
         with:
           context-base64: ${{ needs.triage.outputs.issue-context-base64 }}
-          prompt-base64: ${{ steps.pi-inputs-response.outputs.prompt-base64 }}
-          schema-base64: ${{ steps.pi-inputs-response.outputs.schema-base64 }}
-
-      - name: Save classify response
-        id: save-pi-response-classify
+          prompt-base64: ${{ needs.triage.outputs.classify-response-base64 }}
+      - name: Save response type
+        id: save-response-type
         run: |
-          PI_RESPONSE=$(echo ${{ steps.classify-response.outputs.response-base64 }} | base64 -d | jq .)
-          RESPONSE_TYPE=$(jq -r '.responseType' <<< "${PI_RESPONSE}")
-          CODE_CHANGES_REQUIRED=$(jq -r '.codeChangesRequired' <<< "${PI_RESPONSE}")
-          EXTRA_INFORMATION_REQUIRED=$(jq -r '.extraInformationRequired' <<< "${PI_RESPONSE}")
+          RESPONSE_TYPE=$(echo ${{ steps.classify-response.outputs.response-base64 }} | base64 -d)
           echo "RESPONSE_TYPE: ${RESPONSE_TYPE}"
-          echo "CODE_CHANGES_REQUIRED: ${CODE_CHANGES_REQUIRED}"
-          echo "EXTRA_INFORMATION_REQUIRED: ${EXTRA_INFORMATION_REQUIRED}"
           echo "response-type=${RESPONSE_TYPE}" >> $GITHUB_OUTPUT
-          echo "code-changes-required=${CODE_CHANGES_REQUIRED}" >> $GITHUB_OUTPUT
+
+      - name: Classify code changes required
+        id: classify-are-code-changes-required
+        if: steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY'
+        uses: ./.github/actions/invoke-pi
+        with:
+          context-base64: ${{ needs.triage.outputs.issue-context-base64 }}
+          prompt-base64: ${{ needs.triage.outputs.are-code-changes-required-base64 }}
+      - name: Save code changes required
+        id: save-are-code-changes-required
+        if: steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY'
+        run: |
+          ARE_CODE_CHANGES_REQUIRED=$(echo ${{ steps.classify-are-code-changes-required.outputs.response-base64 }} | base64 -d)
+          echo "ARE_CODE_CHANGES_REQUIRED: ${ARE_CODE_CHANGES_REQUIRED}"
+          echo "are-code-changes-required=${ARE_CODE_CHANGES_REQUIRED}" >> $GITHUB_OUTPUT
+
+      - name: Classify extra information required
+        id: classify-extra-information-required
+        if: steps.save-response-type.outputs.response-type == 'REQUIRES_MORE_INFORMATION'
+        uses: ./.github/actions/invoke-pi
+        with:
+          context-base64: ${{ needs.triage.outputs.issue-context-base64 }}
+          prompt-base64: ${{ needs.triage.outputs.extra-information-required-base64 }}
+      - name: Save extra information required
+        id: save-extra-information-required
+        if: steps.save-response-type.outputs.response-type == 'REQUIRES_MORE_INFORMATION'
+        run: |
+          EXTRA_INFORMATION_REQUIRED=$(echo ${{ steps.classify-extra-information-required.outputs.response-base64 }} | base64 -d)
+          echo "EXTRA_INFORMATION_REQUIRED: ${EXTRA_INFORMATION_REQUIRED}"
           echo "extra-information-required<<EOF" >> $GITHUB_OUTPUT
           echo "${EXTRA_INFORMATION_REQUIRED}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
 # Already addressed
       - name: Reply as already addressed
-        if: steps.save-pi-response-classify.outputs.response-type == 'ALREADY_ADDRESSED'
+        if: steps.save-response-type.outputs.response-type == 'ALREADY_ADDRESSED'
         uses: actions/github-script@v7
         with:
           script: |
             let body = `I think this has already been addressed.\nIf it hasn't please add another comment.`;
-            if (${{ steps.checkout-issue-branch.outputs.issue-branch-exists }}) {
+            if (${{ steps.checkout-issue-branch.outputs.issue-branch-exists }} == true) {
               body += `\n[The changes I have made can be found here.](https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${{ needs.triage.outputs.issue-branch-base }}...${{ needs.triage.outputs.issue-branch }})`;
             }
             github.rest.issues.createComment({
@@ -227,7 +245,7 @@ jobs:
 
 # Require human
       - name: Require human
-        if: steps.save-pi-response-classify.outputs.response-type == 'REQUIRES_HUMAN'
+        if: steps.save-response-type.outputs.response-type == 'REQUIRES_HUMAN'
         uses: actions/github-script@v7
         with:
           script: |
@@ -240,7 +258,7 @@ jobs:
 
 # Ask for more information
       - name: Add confused reaction
-        if: steps.save-pi-response-classify.outputs.response-type == 'REQUIRES_MORE_INFORMATION'
+        if: steps.save-response-type.outputs.response-type == 'REQUIRES_MORE_INFORMATION'
         uses: ./.github/actions/emoji-react
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -248,11 +266,11 @@ jobs:
           reaction: 'confused'
           token: ${{ secrets.ISSUE_READ_WRITE }}
       - name: Ask for required information
-        if: steps.save-pi-response-classify.outputs.response-type == 'REQUIRES_MORE_INFORMATION'
+        if: steps.save-response-type.outputs.response-type == 'REQUIRES_MORE_INFORMATION'
         uses: actions/github-script@v7
         with:
           script: |
-            const extraInfo = ${{ steps.save-pi-response-classify.outputs.extra-information-required }};
+            const extraInfo = ${{ steps.save-extra-information-required.outputs.extra-information-required }};
             let body = 'The following additional information is required:\n';
             if (Array.isArray(extraInfo)) {
               extraInfo.forEach(item => {
@@ -270,7 +288,7 @@ jobs:
 
 # Respond
       - name: Add thumbs up reaction
-        if: steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY'
+        if: steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY'
         uses: ./.github/actions/emoji-react
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -278,39 +296,29 @@ jobs:
           reaction: '+1'
           token: ${{ secrets.ISSUE_READ_WRITE }}
       - name: Ensure issue branch
-        if: (steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-pi-response-classify.outputs.code-changes-required == 'true')
+        if: (steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-are-code-changes-required.outputs.are-code-changes-required == 'true')
         uses: ./.github/actions/checkout-branch
         with:
           branch: ${{ needs.triage.outputs.issue-branch }}
           base: ${{ needs.triage.outputs.issue-branch-base }}
           create-if-not-exists: true
-      - name: Create pi inputs for addressing issue
-        id: pi-inputs-address
-        if: steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY'
-        run: |
-          PROMPT_BASE64=$(cat .github/dialogues/prompts/address-issue.txt | base64 -w 0)
-          SCHEMA_BASE64=$(cat .github/dialogues/responses/completed-issue-schema.json | jq -c | base64 -w 0)
-          echo "prompt-base64=${PROMPT_BASE64}" >> $GITHUB_OUTPUT
-          echo "schema-base64=${SCHEMA_BASE64}" >> $GITHUB_OUTPUT
       - name: Address issue
         id: address-issue
-        if: steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY'
+        if: steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY'
         uses: ./.github/actions/invoke-pi
         with:
           context-base64: ${{ needs.triage.outputs.issue-context-base64 }}
-          prompt-base64: ${{ steps.pi-inputs-address.outputs.prompt-base64 }}
-          schema-base64: ${{ steps.pi-inputs-address.outputs.schema-base64 }}
+          prompt-base64: ${{ needs.triage.outputs.address-issue-base64 }}
       - name: Save address response
-        id: save-pi-response-address
-        if: steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY'
+        id: save-address-issue-summary
+        if: steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY'
         run: |
-          PI_RESPONSE=$(echo "${{ steps.address-issue.outputs.response-base64 }}" | base64 -d | jq .)
-          SUMMARY=$(jq -r '.summary' <<< "${PI_RESPONSE}")
+          SUMMARY=$(echo "${{ steps.address-issue.outputs.response-base64 }}" | base64 -d)
           echo "summary<<EOF" >> $GITHUB_OUTPUT
           echo "${SUMMARY}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Reply if no code changes required
-        if: (steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-pi-response-classify.outputs.code-changes-required == 'false')
+        if: (steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-are-code-changes-required.outputs.are-code-changes-required == 'false')
         uses: actions/github-script@v7
         with:
           script: |
@@ -318,23 +326,23 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "${{ steps.save-pi-response-address.outputs.summary }}"
+              body: `${{ steps.save-address-issue-summary.outputs.summary }}`
             });
       - name: Raise PR if code changes required
         id: raise-pr
-        if: (steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-pi-response-classify.outputs.code-changes-required == 'true')
+        if: (steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-are-code-changes-required.outputs.are-code-changes-required == 'true')
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.RAISE_PR_PAT }}
           commit-message: "Feature branch for ${{ github.event.issue.number }} ${{ github.event.issue.title }}"
           title: "Closes #${{ github.event.issue.number }} ${{ github.event.issue.title }}"
-          body: "${{ steps.save-pi-response-address.outputs.summary }}"
+          body: "${{ steps.save-address-issue-summary.outputs.summary }}"
           branch: ${{ needs.triage.outputs.issue-branch }}
           base: ${{ needs.triage.outputs.issue-branch-base }}
           delete-branch: true
           draft: false
       - name: Reply with diff and PR link
-        if: (steps.save-pi-response-classify.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-pi-response-classify.outputs.code-changes-required == 'true')
+        if: (steps.save-response-type.outputs.response-type == 'CAN_ADDRESS_FULLY') && (steps.save-are-code-changes-required.outputs.are-code-changes-required == 'true')
         uses: actions/github-script@v7
         with:
           script: |

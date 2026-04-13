@@ -7,9 +7,6 @@ inputs:
   prompt-base64:
     description: "Prompt to send to pi in base64"
     required: true
-  schema-base64:
-    description: "Response schema in base64"
-    required: true
 outputs:
   response-base64:
     description: "Response json formatted in schema in base64"
@@ -22,16 +19,9 @@ runs:
       run: |
         CONTEXT=$(echo ${{ inputs.context-base64 }} | base64 -d)
         PROMPT=$(echo ${{ inputs.prompt-base64 }} | base64 -d)
-        SCHEMA=$(echo ${{ inputs.schema-base64 }} | base64 -d)
         echo "${CONTEXT}"
         echo "${PROMPT}"
-        echo "${SCHEMA}"
-        PI_PROMPT=
-        PI_PROMPT="${PI_PROMPT} IMPORTANT: Your response MUST be formatted in the following schema. \n\n ${SCHEMA} \n\n"
-        PI_PROMPT="${PI_PROMPT} Do not print anything else apart from the json blob. No explanations. No introductions or conclusions."
-        PI_PROMPT="${PI_PROMPT} Provide ONLY the raw JSON without any markdown formatting, code blocks, or explanations."
-        PI_PROMPT="${PI_PROMPT} Output format: Just the JSON object, starting with an open curly bracket and ending with a closing curly bracket."
-        PI_PROMPT="${PI_PROMPT} Context: ${CONTEXT} \n\n End of context. \n\n ${PROMPT} \n\n "
+        PI_PROMPT="Context: ${CONTEXT} \n\n End of context. \n\n ${PROMPT}"
         PI_RESPONSE=$(pi \
           --provider deepseek \
           --model deepseek-chat \
