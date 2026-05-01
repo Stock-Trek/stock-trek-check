@@ -7,9 +7,9 @@ use crate::{
     },
 };
 
-pub struct Resolvers {}
+pub struct ResolversFactory {}
 
-impl Resolvers {
+impl ResolversFactory {
     pub fn action(&self, action: Action) -> Resolver {
         ActionResolver::new(action)
     }

@@ -14,9 +14,9 @@ use crate::{
 use digdigdig3::{Asset, ExchangeId};
 use std::cmp::Ordering;
 
-pub struct Predicates {}
+pub struct PredicatesFactory {}
 
-impl Predicates {
+impl PredicatesFactory {
     pub fn compare(
         &self,
         left: NumberValue,

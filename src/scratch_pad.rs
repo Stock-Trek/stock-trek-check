@@ -16,22 +16,28 @@ pub struct ScratchPad {
     values: HashMap<String, ScratchValue>,
 }
 
+impl Default for ScratchPad {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ScratchPad {
     pub fn new() -> Self {
         Self {
             values: HashMap::new(),
         }
     }
-    pub fn write_asset(&mut self, key: impl AsRef<str>, asset: impl AsRef<str>) -> () {
+    pub fn write_asset(&mut self, key: impl AsRef<str>, asset: impl AsRef<str>) {
         self.write(key, ScratchValue::Asset(asset.as_ref().to_string()))
     }
-    pub fn write_exchange(&mut self, key: impl AsRef<str>, exchange: ExchangeId) -> () {
+    pub fn write_exchange(&mut self, key: impl AsRef<str>, exchange: ExchangeId) {
         self.write(key, ScratchValue::Exchange(exchange))
     }
-    pub fn write_flag(&mut self, key: impl AsRef<str>, flag: bool) -> () {
+    pub fn write_flag(&mut self, key: impl AsRef<str>, flag: bool) {
         self.write(key, ScratchValue::Flag(flag))
     }
-    pub fn write_number(&mut self, key: impl AsRef<str>, number: f64) -> () {
+    pub fn write_number(&mut self, key: impl AsRef<str>, number: f64) {
         self.write(key, ScratchValue::Number(number))
     }
     pub fn read_asset_required(&self, key: impl AsRef<str>) -> Result<Asset> {
@@ -61,9 +67,8 @@ impl ScratchPad {
 }
 
 impl ScratchPad {
-    pub fn write(&mut self, key: impl AsRef<str>, value: ScratchValue) -> () {
+    pub fn write(&mut self, key: impl AsRef<str>, value: ScratchValue) {
         self.values.insert(key.as_ref().to_string(), value);
-        ()
     }
     fn read_required<T>(&self, key: impl AsRef<str>) -> Result<T>
     where
@@ -82,10 +87,7 @@ impl ScratchPad {
         let value = self.values.get(key.as_ref());
         match value {
             None => None,
-            Some(v) => match T::try_from(v.clone()) {
-                Err(..) => None,
-                Ok(t) => Some(t),
-            },
+            Some(v) => T::try_from(v.clone()).ok(),
         }
     }
 }

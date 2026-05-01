@@ -41,7 +41,7 @@ impl LiteralExchangeValue {
 #[typetag::serde]
 impl ExchangeValueTrait for LiteralExchangeValue {
     fn exchange(&self, _: &ResolvedContext) -> Result<ExchangeId> {
-        Ok(self.literal.clone())
+        Ok(self.literal)
     }
 }
 
@@ -59,7 +59,7 @@ impl LiteralFlagValue {
 #[typetag::serde]
 impl FlagValueTrait for LiteralFlagValue {
     fn flag(&self, _: &ResolvedContext) -> Result<bool> {
-        Ok(self.literal.clone())
+        Ok(self.literal)
     }
 }
 
@@ -77,6 +77,6 @@ impl LiteralNumberValue {
 #[typetag::serde]
 impl NumberValueTrait for LiteralNumberValue {
     fn number(&self, _: &ResolvedContext) -> Result<f64> {
-        Ok(self.literal.clone())
+        Ok(self.literal)
     }
 }

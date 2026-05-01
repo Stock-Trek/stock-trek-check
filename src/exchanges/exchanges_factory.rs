@@ -7,9 +7,9 @@ use crate::{
 use digdigdig3::Symbol;
 use std::collections::{HashMap, HashSet};
 
-pub struct Exchanges {}
+pub struct ExchangesFactory {}
 
-impl Exchanges {
+impl ExchangesFactory {
     pub fn in_memory(
         capabilities: HashSet<OrderCapability>,
         markets: HashMap<Symbol, Market>,

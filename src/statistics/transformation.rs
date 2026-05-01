@@ -38,7 +38,7 @@ impl Transformation {
 
 pub fn box_cox(values: &[f64], lambda: f64) -> StatsResult<Vec<f64>> {
     if values.is_empty() {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     let mut result = Vec::with_capacity(values.len());
     for &x in values {
@@ -59,7 +59,7 @@ pub fn box_cox(values: &[f64], lambda: f64) -> StatsResult<Vec<f64>> {
 pub fn detrend_linear(values: &[f64]) -> StatsResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     let x: Vec<f64> = (0..n).map(|i| i as f64).collect();
     let mean_x = stats::mean(&x)?;
@@ -77,7 +77,7 @@ pub fn detrend_linear(values: &[f64]) -> StatsResult<Vec<f64>> {
         })
         .sum();
     if denominator == 0.0 {
-        return Err(StatsError::ZeroVariance.into());
+        return Err(StatsError::ZeroVariance);
     }
     let slope = numerator / denominator;
     let intercept = mean_y - slope * mean_x;
@@ -92,13 +92,13 @@ pub fn detrend_linear(values: &[f64]) -> StatsResult<Vec<f64>> {
 pub fn difference(values: &[f64], order: usize) -> StatsResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     if order == 0 {
         return Ok(values.to_vec());
     }
     if order >= n {
-        return Err(StatsError::InsufficientDegreesOfFreedom.into());
+        return Err(StatsError::InsufficientDegreesOfFreedom);
     }
     let mut result = values.to_vec();
     for _ in 0..order {
@@ -110,7 +110,7 @@ pub fn difference(values: &[f64], order: usize) -> StatsResult<Vec<f64>> {
 pub fn lag(values: &[f64], lag: usize) -> StatsResult<Vec<Option<f64>>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     let mut result = Vec::with_capacity(n);
     for i in 0..n {
@@ -125,7 +125,7 @@ pub fn lag(values: &[f64], lag: usize) -> StatsResult<Vec<Option<f64>>> {
 
 pub fn logarithm(values: &[f64]) -> StatsResult<Vec<f64>> {
     if values.is_empty() {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     let mut result = Vec::with_capacity(values.len());
     for &x in values {
@@ -142,10 +142,10 @@ pub fn logarithm(values: &[f64]) -> StatsResult<Vec<f64>> {
 pub fn rolling_mean(values: &[f64], window: usize) -> StatsResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     if window == 0 || window > n {
-        return Err(StatsError::InvalidLag.into());
+        return Err(StatsError::InvalidLag);
     }
     let result: Vec<f64> = values
         .windows(window)
@@ -157,10 +157,10 @@ pub fn rolling_mean(values: &[f64], window: usize) -> StatsResult<Vec<f64>> {
 pub fn rolling_standard_deviation(values: &[f64], window: usize) -> StatsResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     if window == 0 || window > n {
-        return Err(StatsError::InvalidLag.into());
+        return Err(StatsError::InvalidLag);
     }
     let mut result = Vec::with_capacity(n - window + 1);
     for w in values.windows(window) {
@@ -173,10 +173,10 @@ pub fn rolling_standard_deviation(values: &[f64], window: usize) -> StatsResult<
 pub fn seasonal_difference(values: &[f64], period: usize) -> StatsResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput.into());
+        return Err(StatsError::EmptyInput);
     }
     if period == 0 || period >= n {
-        return Err(StatsError::InvalidLag.into());
+        return Err(StatsError::InvalidLag);
     }
     let result: Vec<f64> = (period..n)
         .map(|i| values[i] - values[i - period])

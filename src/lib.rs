@@ -2,7 +2,7 @@ pub mod actions;
 pub mod examples;
 pub mod exchanges;
 pub mod market_data;
-pub mod portfolio;
+pub mod portfolios;
 pub mod predicates;
 pub mod resolved_context;
 pub mod resolver_context;

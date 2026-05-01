@@ -1,16 +1,19 @@
 use crate::{
-    actions::actions::Actions,
-    predicates::predicates::Predicates,
-    resolvers::resolvers::Resolvers,
-    values::values::{CalculationValues, LiteralValues, PortfolioValues, ScratchPadValues},
+    actions::actions_factory::ActionsFactory,
+    predicates::predicates_factory::PredicatesFactory,
+    resolvers::resolvers_factory::ResolversFactory,
+    values::values_factory::{
+        CalculationValuesFactory, LiteralValuesFactory, PortfolioValuesFactory,
+        ScratchPadValuesFactory,
+    },
 };
 
 pub struct ResolverContext {
-    pub actions: Actions,
-    pub calculations: CalculationValues,
-    pub literals: LiteralValues,
-    pub portfolio: PortfolioValues,
-    pub predicates: Predicates,
-    pub resolvers: Resolvers,
-    pub scratch_pad: ScratchPadValues,
+    pub actions: ActionsFactory,
+    pub calculations: CalculationValuesFactory,
+    pub literals: LiteralValuesFactory,
+    pub portfolio: PortfolioValuesFactory,
+    pub predicates: PredicatesFactory,
+    pub resolvers: ResolversFactory,
+    pub scratch_pad: ScratchPadValuesFactory,
 }

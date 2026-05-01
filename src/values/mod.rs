@@ -7,4 +7,4 @@ pub mod literal_value;
 pub mod scratch_pad_value;
 pub mod unary_calculation_value;
 pub mod value;
-pub mod values;
+pub mod values_factory;

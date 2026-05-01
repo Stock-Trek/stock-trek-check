@@ -10,13 +10,8 @@ pub enum ScratchPadKey {
     SatoshiPrice,
 }
 
+#[derive(Default)]
 pub struct CostAveraging {}
-
-impl Default for CostAveraging {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 #[register_strategy(default)]
 impl Strategy for CostAveraging {
@@ -25,13 +20,10 @@ impl Strategy for CostAveraging {
         if let Some(binance) = context.exchanges.get(&ExchangeId::Binance) {
             let btc_usdt = context.symbol(BTC, USDT);
             let market_opt = binance.market_for(&btc_usdt)?;
-            match market_opt {
-                Some(market) => {
-                    let key = ScratchPadKey::SatoshiPrice.to_string();
-                    let satoshi_price = market.ticks.ticks[0].last.price / 1_000_000.0;
-                    scratch_pad.write_number(key, satoshi_price);
-                }
-                None => {}
+            if let Some(market) = market_opt {
+                let key = ScratchPadKey::SatoshiPrice.to_string();
+                let satoshi_price = market.ticks.ticks[0].last.price / 1_000_000.0;
+                scratch_pad.write_number(key, satoshi_price);
             }
         }
         Ok(scratch_pad)

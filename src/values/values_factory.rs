@@ -15,12 +15,12 @@ use crate::values::{
 };
 use digdigdig3::ExchangeId;
 
-pub struct PortfolioValues {}
-pub struct CalculationValues {}
-pub struct LiteralValues {}
-pub struct ScratchPadValues {}
+pub struct PortfolioValuesFactory {}
+pub struct CalculationValuesFactory {}
+pub struct LiteralValuesFactory {}
+pub struct ScratchPadValuesFactory {}
 
-impl PortfolioValues {
+impl PortfolioValuesFactory {
     pub fn asset_in_exchange(&self, exchange: ExchangeValue, asset: AssetValue) -> NumberValue {
         AssetInExchangeValue::new(exchange, asset)
     }
@@ -35,7 +35,7 @@ impl PortfolioValues {
     }
 }
 
-impl CalculationValues {
+impl CalculationValuesFactory {
     pub fn binary(
         &self,
         left: NumberValue,
@@ -49,7 +49,7 @@ impl CalculationValues {
     }
 }
 
-impl LiteralValues {
+impl LiteralValuesFactory {
     pub fn asset(&self, literal: impl AsRef<str>) -> AssetValue {
         LiteralAssetValue::new(literal.as_ref().to_string())
     }
@@ -64,7 +64,7 @@ impl LiteralValues {
     }
 }
 
-impl ScratchPadValues {
+impl ScratchPadValuesFactory {
     pub fn asset(&self, key: impl AsRef<str>) -> AssetValue {
         ScratchPadAssetValue::new(key.as_ref().to_string())
     }

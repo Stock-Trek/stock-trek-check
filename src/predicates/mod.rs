@@ -4,6 +4,6 @@ pub mod not_predicate;
 pub mod owns_asset_in_exchange_predicate;
 pub mod owns_asset_predicate;
 pub mod predicate;
-pub mod predicates;
+pub mod predicates_factory;
 pub mod quantity_of_predicate;
 pub mod scratch_pad_predicate;
