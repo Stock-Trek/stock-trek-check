@@ -1,5 +1,5 @@
 use crate::{
-    assembler_context::AssemblerContext,
+    resolved_context::ResolvedContext,
     values::value::{NumberValue, NumberValueTrait},
 };
 use anyhow::{bail, Result};
@@ -49,7 +49,7 @@ impl UnaryCalculationValue {
 
 #[typetag::serde]
 impl NumberValueTrait for UnaryCalculationValue {
-    fn number(&self, context: &AssemblerContext) -> Result<f64> {
+    fn number(&self, context: &ResolvedContext) -> Result<f64> {
         let value = self.number.number(context)?;
         let calculation_result = match self.operator {
             UnaryOperator::Abs => value.abs(),

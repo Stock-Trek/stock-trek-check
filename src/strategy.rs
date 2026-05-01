@@ -1,9 +1,10 @@
 use crate::{
-    assemblers::assembler::Assembler, scratch_pad::ScratchPad, strategy_context::StrategyContext,
+    resolver_context::ResolverContext, resolvers::resolver::Resolver, scratch_pad::ScratchPad,
+    strategy_context::StrategyContext,
 };
 use anyhow::Result;
 
 pub trait Strategy: Send + Sync {
-    fn portfolio_response(&self) -> Result<Assembler>;
     fn market_calculations(&self, context: StrategyContext) -> Result<ScratchPad>;
+    fn action_resolver(&self, context: ResolverContext) -> Result<Resolver>;
 }

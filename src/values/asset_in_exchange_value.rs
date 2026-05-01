@@ -1,5 +1,5 @@
 use crate::{
-    assembler_context::AssemblerContext,
+    resolved_context::ResolvedContext,
     values::value::{AssetValue, ExchangeValue, NumberValue, NumberValueTrait},
 };
 use anyhow::Result;
@@ -19,7 +19,7 @@ impl AssetInExchangeValue {
 
 #[typetag::serde]
 impl NumberValueTrait for AssetInExchangeValue {
-    fn number(&self, context: &AssemblerContext) -> Result<f64> {
+    fn number(&self, context: &ResolvedContext) -> Result<f64> {
         let exchange = self.exchange.exchange(context)?;
         let asset = self.asset.asset(context)?;
         Ok(context.portfolio.asset_in_exchange(asset, exchange))

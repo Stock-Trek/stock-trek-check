@@ -1,6 +1,6 @@
 use crate::{
-    assembler_context::AssemblerContext,
     predicates::predicate::{Predicate, PredicateTrait},
+    resolved_context::ResolvedContext,
 };
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ impl QuantityOfPredicate {
 
 #[typetag::serde]
 impl PredicateTrait for QuantityOfPredicate {
-    fn test(&self, context: &AssemblerContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> Result<bool> {
         if self.predicates.is_empty() {
             let empty_result = match self.quantity_of {
                 QuantityOf::All => true,

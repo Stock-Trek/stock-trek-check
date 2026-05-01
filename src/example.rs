@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, resolver_context::ResolverContext};
 use digdigdig3::{
     core::{OrderRequest, TimeInForce},
     AccountType, ExchangeId, OrderSide, OrderType, Symbol,
@@ -10,7 +10,7 @@ const BTC: &str = "BTC";
 const USDT: &str = "USDT";
 
 #[derive(Display, EnumString)]
-pub enum ScratchPadValues {
+pub enum ScratchPadKey {
     SatoshiPrice,
 }
 
@@ -33,7 +33,7 @@ impl Strategy for Dca {
                 Some(market) => {
                     let satoshi_price = market.ticks.ticks[0].last.price / 1_000_000.0;
                     scratch_pad.write(
-                        ScratchPadValues::SatoshiPrice.to_string(),
+                        ScratchPadKey::SatoshiPrice.to_string(),
                         ScratchValue::Number(satoshi_price),
                     );
                 }
@@ -42,11 +42,18 @@ impl Strategy for Dca {
         }
         Ok(scratch_pad)
     }
-    fn portfolio_response(&self) -> anyhow::Result<Assembler> {
+    fn action_resolver(&self, context: ResolverContext) -> anyhow::Result<Resolver> {
         let exchange = ExchangeId::Binance;
-        let satoshi_price = Values::scratch_pad_number(ScratchPadValues::SatoshiPrice.to_string());
-        let usdt = Values::asset_in_exchange(Values::exchange(exchange), Values::asset(USDT));
-        let can_buy = Predicates::compare(usdt, Ordering::Greater, satoshi_price);
+        let satoshi_price = context
+            .scratch_pad
+            .number(ScratchPadKey::SatoshiPrice.to_string());
+        let usdt = context.portfolio.asset_in_exchange(
+            context.literals.exchange(exchange),
+            context.literals.asset(USDT),
+        );
+        let can_buy = context
+            .predicates
+            .compare(usdt, Ordering::Greater, satoshi_price);
         let order_request = OrderRequest {
             account_type: AccountType::Spot,
             client_order_id: None,
@@ -57,9 +64,10 @@ impl Strategy for Dca {
             symbol: Symbol::new(BTC, USDT),
             time_in_force: TimeInForce::Fok,
         };
-        let buy_one_satoshi = Assemblers::action(Actions::order_request(exchange, order_request));
-        let no_op = Assemblers::no_op();
-        let assembler = Assemblers::if_(can_buy, buy_one_satoshi, no_op);
-        Ok(assembler)
+        let buy_one_satoshi_action = context.actions.order_request(exchange, order_request);
+        let buy_one_satoshi = context.resolvers.action(buy_one_satoshi_action);
+        let no_op = context.resolvers.no_op();
+        let resolver = context.resolvers.if_else(can_buy, buy_one_satoshi, no_op);
+        Ok(resolver)
     }
 }

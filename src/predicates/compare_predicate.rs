@@ -1,6 +1,6 @@
 use crate::{
-    assembler_context::AssemblerContext,
     predicates::predicate::{Predicate, PredicateTrait},
+    resolved_context::ResolvedContext,
     util::serde_ordering,
     values::value::NumberValue,
 };
@@ -28,7 +28,7 @@ impl ComparePredicate {
 
 #[typetag::serde]
 impl PredicateTrait for ComparePredicate {
-    fn test(&self, context: &AssemblerContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> Result<bool> {
         let left_value = self.left.number(context)?;
         let right_value = self.right.number(context)?;
         match left_value.partial_cmp(&right_value) {

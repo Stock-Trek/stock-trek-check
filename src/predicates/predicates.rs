@@ -17,25 +17,30 @@ use std::cmp::Ordering;
 pub struct Predicates {}
 
 impl Predicates {
-    pub fn compare(left: NumberValue, comparison: Ordering, right: NumberValue) -> Predicate {
+    pub fn compare(
+        &self,
+        left: NumberValue,
+        comparison: Ordering,
+        right: NumberValue,
+    ) -> Predicate {
         ComparePredicate::new(left, comparison, right)
     }
-    pub fn has_account_in_exchange(exchange: ExchangeId) -> Predicate {
+    pub fn has_account_in_exchange(&self, exchange: ExchangeId) -> Predicate {
         HasAccountInExchangePredicate::new(exchange)
     }
-    pub fn not(predicate: Predicate) -> Predicate {
+    pub fn not(&self, predicate: Predicate) -> Predicate {
         NotPredicate::new(predicate)
     }
-    pub fn owns_asset_in_exchange(asset: Asset, exchange: ExchangeId) -> Predicate {
+    pub fn owns_asset_in_exchange(&self, asset: Asset, exchange: ExchangeId) -> Predicate {
         OwnsAssetInExchangePredicate::new(asset, exchange)
     }
-    pub fn owns_asset(asset: Asset) -> Predicate {
+    pub fn owns_asset(&self, asset: Asset) -> Predicate {
         OwnsAssetPredicate::new(asset)
     }
-    pub fn quantity_of(quantity_of: QuantityOf, predicates: Vec<Predicate>) -> Predicate {
+    pub fn quantity_of(&self, quantity_of: QuantityOf, predicates: Vec<Predicate>) -> Predicate {
         QuantityOfPredicate::new(quantity_of, predicates)
     }
-    pub fn scratch_pad(key: String) -> Predicate {
+    pub fn scratch_pad(&self, key: String) -> Predicate {
         ScratchPadPredicate::new(key)
     }
 }

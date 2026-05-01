@@ -1,5 +1,5 @@
 use crate::{
-    assembler_context::AssemblerContext,
+    resolved_context::ResolvedContext,
     values::value::{
         AssetValue, AssetValueTrait, ExchangeValue, ExchangeValueTrait, FlagValue, FlagValueTrait,
         NumberValue, NumberValueTrait,
@@ -22,7 +22,7 @@ impl ScratchPadAssetValue {
 
 #[typetag::serde]
 impl AssetValueTrait for ScratchPadAssetValue {
-    fn asset(&self, context: &AssemblerContext) -> Result<Asset> {
+    fn asset(&self, context: &ResolvedContext) -> Result<Asset> {
         context.scratch_pad.read_required(&self.key)
     }
 }
@@ -40,7 +40,7 @@ impl ScratchPadExchangeValue {
 
 #[typetag::serde]
 impl ExchangeValueTrait for ScratchPadExchangeValue {
-    fn exchange(&self, context: &AssemblerContext) -> Result<ExchangeId> {
+    fn exchange(&self, context: &ResolvedContext) -> Result<ExchangeId> {
         context.scratch_pad.read_required(&self.key)
     }
 }
@@ -58,7 +58,7 @@ impl ScratchPadFlagValue {
 
 #[typetag::serde]
 impl FlagValueTrait for ScratchPadFlagValue {
-    fn flag(&self, context: &AssemblerContext) -> Result<bool> {
+    fn flag(&self, context: &ResolvedContext) -> Result<bool> {
         context.scratch_pad.read_required(&self.key)
     }
 }
@@ -76,7 +76,7 @@ impl ScratchPadNumberValue {
 
 #[typetag::serde]
 impl NumberValueTrait for ScratchPadNumberValue {
-    fn number(&self, context: &AssemblerContext) -> Result<f64> {
+    fn number(&self, context: &ResolvedContext) -> Result<f64> {
         context.scratch_pad.read_required(&self.key)
     }
 }

@@ -1,6 +1,6 @@
 use crate::{
-    assembler_context::AssemblerContext,
     predicates::predicate::{Predicate, PredicateTrait},
+    resolved_context::ResolvedContext,
 };
 use anyhow::Result;
 use digdigdig3::{Asset, ExchangeId};
@@ -20,7 +20,7 @@ impl OwnsAssetInExchangePredicate {
 
 #[typetag::serde]
 impl PredicateTrait for OwnsAssetInExchangePredicate {
-    fn test(&self, context: &AssemblerContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> Result<bool> {
         Ok(context
             .portfolio
             .owns_asset_in_exchange(&self.asset, &self.exchange))

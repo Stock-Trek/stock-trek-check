@@ -1,5 +1,5 @@
 use crate::{
-    assembler_context::AssemblerContext,
+    resolved_context::ResolvedContext,
     values::value::{NumberValue, NumberValueTrait},
 };
 use anyhow::{bail, Result};
@@ -36,7 +36,7 @@ impl BinaryCalculationValue {
 
 #[typetag::serde]
 impl NumberValueTrait for BinaryCalculationValue {
-    fn number(&self, context: &AssemblerContext) -> Result<f64> {
+    fn number(&self, context: &ResolvedContext) -> Result<f64> {
         let left_value = self.left.number(context)?;
         let right_value = self.right.number(context)?;
         let calculation_result = match self.operator {

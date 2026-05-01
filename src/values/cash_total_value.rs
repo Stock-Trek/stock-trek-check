@@ -1,5 +1,5 @@
 use crate::{
-    assembler_context::AssemblerContext,
+    resolved_context::ResolvedContext,
     values::value::{NumberValue, NumberValueTrait},
 };
 use anyhow::Result;
@@ -16,7 +16,7 @@ impl CashTotalValue {
 
 #[typetag::serde]
 impl NumberValueTrait for CashTotalValue {
-    fn number(&self, context: &AssemblerContext) -> Result<f64> {
+    fn number(&self, context: &ResolvedContext) -> Result<f64> {
         Ok(context.portfolio.cash_total())
     }
 }

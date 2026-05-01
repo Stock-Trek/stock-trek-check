@@ -1,6 +1,6 @@
 use crate::{
-    assembler_context::AssemblerContext,
     predicates::predicate::{Predicate, PredicateTrait},
+    resolved_context::ResolvedContext,
 };
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ impl NotPredicate {
 
 #[typetag::serde]
 impl PredicateTrait for NotPredicate {
-    fn test(&self, context: &AssemblerContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> Result<bool> {
         let test_result = self.predicate.test(context)?;
         Ok(!test_result)
     }

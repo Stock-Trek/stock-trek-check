@@ -1,5 +1,5 @@
 use crate::{
-    assembler_context::AssemblerContext,
+    resolved_context::ResolvedContext,
     values::value::{
         AssetValue, AssetValueTrait, ExchangeValue, ExchangeValueTrait, FlagValue, FlagValueTrait,
         NumberValue, NumberValueTrait,
@@ -22,7 +22,7 @@ impl LiteralAssetValue {
 
 #[typetag::serde]
 impl AssetValueTrait for LiteralAssetValue {
-    fn asset(&self, _: &AssemblerContext) -> Result<Asset> {
+    fn asset(&self, _: &ResolvedContext) -> Result<Asset> {
         Ok(self.literal.clone())
     }
 }
@@ -40,7 +40,7 @@ impl LiteralExchangeValue {
 
 #[typetag::serde]
 impl ExchangeValueTrait for LiteralExchangeValue {
-    fn exchange(&self, _: &AssemblerContext) -> Result<ExchangeId> {
+    fn exchange(&self, _: &ResolvedContext) -> Result<ExchangeId> {
         Ok(self.literal.clone())
     }
 }
@@ -58,7 +58,7 @@ impl LiteralFlagValue {
 
 #[typetag::serde]
 impl FlagValueTrait for LiteralFlagValue {
-    fn flag(&self, _: &AssemblerContext) -> Result<bool> {
+    fn flag(&self, _: &ResolvedContext) -> Result<bool> {
         Ok(self.literal.clone())
     }
 }
@@ -76,7 +76,7 @@ impl LiteralNumberValue {
 
 #[typetag::serde]
 impl NumberValueTrait for LiteralNumberValue {
-    fn number(&self, _: &AssemblerContext) -> Result<f64> {
+    fn number(&self, _: &ResolvedContext) -> Result<f64> {
         Ok(self.literal.clone())
     }
 }
