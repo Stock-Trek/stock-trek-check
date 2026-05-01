@@ -14,9 +14,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        env:
+          GITHUB_TOKEN:
         with:
           fetch-tags: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ env.GITHUB_TOKEN }}
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -27,16 +29,14 @@ jobs:
           cargo clippy
           cargo test
 
-      - name: Get version
-        id: get_tag
+      - name: Get version, check if tag exists, create if not
         run: |
           VERSION=$(cargo pkgid | cut -d @ -f 2)
-          echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
-          echo "Create tag ${TAG} if not exists"
-
-      - name: Create and push tag
-        uses: actions-ecosystem/action-create-tag@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.get_tag.outputs.tag }}
-          force_push_tag: false
+          TAG="v${VERSION}"
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q "refs/tags/${TAG}"; then
+            echo "Tag ${TAG} already exists"
+          else
+            echo "Creating tag ${TAG}"
+            git tag "${TAG}"
+            git push origin "${TAG}"
+          fi
