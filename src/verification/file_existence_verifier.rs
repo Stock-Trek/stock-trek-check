@@ -1,4 +1,7 @@
-use crate::verification::verification_error::{VerificationError, NO_SUCH_FILE};
+use crate::error::{
+    result::{StockTrekError, StockTrekResult},
+    verification::{VerificationError, NO_SUCH_FILE},
+};
 
 pub struct FileExistenceVerifier;
 
@@ -6,12 +9,12 @@ impl FileExistenceVerifier {
     pub fn new() -> Self {
         Self {}
     }
-    pub fn verify(&self, path: String) -> Result<String, VerificationError> {
+    pub fn verify(&self, path: String) -> StockTrekResult<String> {
         match std::fs::read_to_string(path) {
-            Err(e) => Err(VerificationError {
+            Err(e) => Err(StockTrekError::Verification(VerificationError {
                 exit_code: NO_SUCH_FILE,
                 errors: vec![e.to_string()],
-            }),
+            })),
             Ok(contents) => Ok(contents),
         }
     }

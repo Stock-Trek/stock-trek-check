@@ -1,9 +1,9 @@
 use crate::{
     actions::action::Action,
+    error::result::StockTrekResult,
     resolved_context::ResolvedContext,
     resolvers::resolver::{Resolver, ResolverTrait},
 };
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -19,7 +19,11 @@ impl ActionResolver {
 
 #[typetag::serde]
 impl ResolverTrait for ActionResolver {
-    fn resolve(&self, _context: &ResolvedContext, actions: &mut Vec<Action>) -> Result<()> {
+    fn resolve(
+        &self,
+        _context: &ResolvedContext,
+        actions: &mut Vec<Action>,
+    ) -> StockTrekResult<()> {
         actions.push(self.action.clone_box());
         Ok(())
     }

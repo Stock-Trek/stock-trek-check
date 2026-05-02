@@ -1,10 +1,10 @@
 use crate::{
     actions::action::Action,
+    error::result::StockTrekResult,
     predicates::predicate::Predicate,
     resolved_context::ResolvedContext,
     resolvers::resolver::{Resolver, ResolverTrait},
 };
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -26,7 +26,7 @@ impl IfResolver {
 
 #[typetag::serde]
 impl ResolverTrait for IfResolver {
-    fn resolve(&self, context: &ResolvedContext, actions: &mut Vec<Action>) -> Result<()> {
+    fn resolve(&self, context: &ResolvedContext, actions: &mut Vec<Action>) -> StockTrekResult<()> {
         let predicate = self.condition.test(context)?;
         if predicate {
             self.if_true.resolve(context, actions)?;

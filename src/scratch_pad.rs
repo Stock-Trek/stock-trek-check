@@ -1,4 +1,7 @@
-use anyhow::{bail, Result};
+use crate::error::{
+    result::{StockTrekError, StockTrekResult},
+    value::ValueError,
+};
 use digdigdig3::{Asset, ExchangeId};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom};
@@ -40,16 +43,16 @@ impl ScratchPad {
     pub fn write_number(&mut self, key: impl AsRef<str>, number: f64) {
         self.write(key, ScratchValue::Number(number))
     }
-    pub fn read_asset_required(&self, key: impl AsRef<str>) -> Result<Asset> {
+    pub fn read_asset_required(&self, key: impl AsRef<str>) -> StockTrekResult<Asset> {
         self.read_required::<Asset>(key)
     }
-    pub fn read_exchange_required(&self, key: impl AsRef<str>) -> Result<ExchangeId> {
+    pub fn read_exchange_required(&self, key: impl AsRef<str>) -> StockTrekResult<ExchangeId> {
         self.read_required::<ExchangeId>(key)
     }
-    pub fn read_flag_required(&self, key: impl AsRef<str>) -> Result<bool> {
+    pub fn read_flag_required(&self, key: impl AsRef<str>) -> StockTrekResult<bool> {
         self.read_required::<bool>(key)
     }
-    pub fn read_number_required(&self, key: impl AsRef<str>) -> Result<f64> {
+    pub fn read_number_required(&self, key: impl AsRef<str>) -> StockTrekResult<f64> {
         self.read_required::<f64>(key)
     }
     pub fn read_asset_optional(&self, key: impl AsRef<str>) -> Option<Asset> {
@@ -70,19 +73,22 @@ impl ScratchPad {
     pub fn write(&mut self, key: impl AsRef<str>, value: ScratchValue) {
         self.values.insert(key.as_ref().to_string(), value);
     }
-    fn read_required<T>(&self, key: impl AsRef<str>) -> Result<T>
+    fn read_required<T>(&self, key: impl AsRef<str>) -> StockTrekResult<T>
     where
-        T: TryFrom<ScratchValue, Error = anyhow::Error>,
+        T: TryFrom<ScratchValue, Error = StockTrekError>,
     {
         let value = self.values.get(key.as_ref());
         match value {
-            None => bail!("Key not found: {}", key.as_ref()),
+            None => Err(StockTrekError::Value(ValueError::NotFound {
+                name: "Key".to_string(),
+                key: key.as_ref().to_string(),
+            })),
             Some(v) => T::try_from(v.clone()),
         }
     }
     fn read_optional<T>(&self, key: impl AsRef<str>) -> Option<T>
     where
-        T: TryFrom<ScratchValue, Error = anyhow::Error>,
+        T: TryFrom<ScratchValue, Error = StockTrekError>,
     {
         let value = self.values.get(key.as_ref());
         match value {
@@ -93,41 +99,56 @@ impl ScratchPad {
 }
 
 impl TryFrom<ScratchValue> for Asset {
-    type Error = anyhow::Error;
-    fn try_from(value: ScratchValue) -> Result<Self, Self::Error> {
+    type Error = StockTrekError;
+    fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
             ScratchValue::Asset(a) => Ok(a),
-            _ => bail!("Found value but is not an Asset"),
+            ScratchValue::Exchange(_) => err("Asset", "Exchange"),
+            ScratchValue::Flag(_) => err("Asset", "Flag"),
+            ScratchValue::Number(_) => err("Asset", "Number"),
         }
     }
 }
 
 impl TryFrom<ScratchValue> for ExchangeId {
-    type Error = anyhow::Error;
-    fn try_from(value: ScratchValue) -> Result<Self, Self::Error> {
+    type Error = StockTrekError;
+    fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
+            ScratchValue::Asset(_) => err("Exchange", "Asset"),
             ScratchValue::Exchange(e) => Ok(e),
-            _ => bail!("Found value but is not an Exchange"),
+            ScratchValue::Flag(_) => err("Exchange", "Flag"),
+            ScratchValue::Number(_) => err("Exchange", "Number"),
         }
     }
 }
 
 impl TryFrom<ScratchValue> for bool {
-    type Error = anyhow::Error;
-    fn try_from(value: ScratchValue) -> Result<Self, Self::Error> {
+    type Error = StockTrekError;
+    fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
+            ScratchValue::Asset(_) => err("Flag", "Asset"),
+            ScratchValue::Exchange(_) => err("Flag", "Exchange"),
             ScratchValue::Flag(f) => Ok(f),
-            _ => bail!("Found value but is not a Flag"),
+            ScratchValue::Number(_) => err("Flag", "Number"),
         }
     }
 }
 
 impl TryFrom<ScratchValue> for f64 {
-    type Error = anyhow::Error;
-    fn try_from(value: ScratchValue) -> Result<Self, Self::Error> {
+    type Error = StockTrekError;
+    fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
+            ScratchValue::Asset(_) => err("Number", "Asset"),
+            ScratchValue::Exchange(_) => err("Number", "Exchange"),
+            ScratchValue::Flag(_) => err("Number", "Flag"),
             ScratchValue::Number(n) => Ok(n),
-            _ => bail!("Found value but is not a Number"),
         }
     }
+}
+
+fn err<T>(expected: impl AsRef<str>, found: impl AsRef<str>) -> StockTrekResult<T> {
+    Err(StockTrekError::Value(ValueError::IncorrectType {
+        expected: expected.as_ref().to_string(),
+        found: found.as_ref().to_string(),
+    }))
 }

@@ -1,8 +1,8 @@
 use crate::{
+    error::result::StockTrekResult,
     predicates::predicate::{Predicate, PredicateTrait},
     resolved_context::ResolvedContext,
 };
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -30,7 +30,7 @@ impl QuantityOfPredicate {
 
 #[typetag::serde]
 impl PredicateTrait for QuantityOfPredicate {
-    fn test(&self, context: &ResolvedContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
         if self.predicates.is_empty() {
             let empty_result = match self.quantity_of {
                 QuantityOf::All => true,

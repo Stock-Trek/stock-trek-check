@@ -1,11 +1,14 @@
 use crate::{
+    error::{
+        result::{StockTrekError, StockTrekResult},
+        value::ValueError,
+    },
     exchanges::{
         exchange::{Exchange, ExchangeTrait},
         order_capability::OrderCapability,
     },
     market_data::market::Market,
 };
-use anyhow::{bail, Result};
 use chrono::Utc;
 use digdigdig3::{core::OrderRequest, Order, OrderStatus, Symbol};
 use serde::{Deserialize, Serialize};
@@ -31,17 +34,20 @@ impl InMemoryExchange {
 }
 
 impl ExchangeTrait for InMemoryExchange {
-    fn has_capability(&self, capability: OrderCapability) -> Result<bool> {
+    fn has_capability(&self, capability: OrderCapability) -> StockTrekResult<bool> {
         Ok(self.capabilities.contains(&capability))
     }
-    fn market_for(&self, symbol: &Symbol) -> Result<Option<&Market>> {
+    fn market_for(&self, symbol: &Symbol) -> StockTrekResult<Option<&Market>> {
         Ok(self.markets.get(symbol))
     }
-    fn place_order(&self, request: &OrderRequest) -> Result<Order> {
+    fn place_order(&self, request: &OrderRequest) -> StockTrekResult<Order> {
         let symbol = &request.symbol;
         let pair = Symbol::new(symbol.base.clone(), symbol.quote.clone());
         match self.markets.get(&pair) {
-            None => bail!("No market found for {}", symbol),
+            None => Err(StockTrekError::Value(ValueError::NotFound {
+                name: "Market".to_string(),
+                key: symbol.to_string(),
+            })),
             Some(_market) => Ok(Order {
                 id: Uuid::new_v4().to_string(),
                 client_order_id: request.client_order_id.clone(),

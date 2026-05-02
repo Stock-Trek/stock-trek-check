@@ -1,51 +1,55 @@
-use crate::statistics::{
-    stats, stats_error::StatsError, stats_result::StatsResult, transformation,
+use crate::{
+    error::{
+        result::{StockTrekError, StockTrekResult},
+        stats::StatsError,
+    },
+    statistics::{stats, transformation},
 };
 
 #[derive(Clone, Default)]
 pub struct Transformation;
 
 impl Transformation {
-    pub fn box_cox(&self, values: &[f64], lambda: f64) -> StatsResult<Vec<f64>> {
+    pub fn box_cox(&self, values: &[f64], lambda: f64) -> StockTrekResult<Vec<f64>> {
         transformation::box_cox(values, lambda)
     }
-    pub fn detrend_linear(&self, values: &[f64]) -> StatsResult<Vec<f64>> {
+    pub fn detrend_linear(&self, values: &[f64]) -> StockTrekResult<Vec<f64>> {
         transformation::detrend_linear(values)
     }
-    pub fn difference(&self, values: &[f64], order: usize) -> StatsResult<Vec<f64>> {
+    pub fn difference(&self, values: &[f64], order: usize) -> StockTrekResult<Vec<f64>> {
         transformation::difference(values, order)
     }
-    pub fn lag(&self, values: &[f64], lag: usize) -> StatsResult<Vec<Option<f64>>> {
+    pub fn lag(&self, values: &[f64], lag: usize) -> StockTrekResult<Vec<Option<f64>>> {
         transformation::lag(values, lag)
     }
-    pub fn logarithm(&self, values: &[f64]) -> StatsResult<Vec<f64>> {
+    pub fn logarithm(&self, values: &[f64]) -> StockTrekResult<Vec<f64>> {
         transformation::logarithm(values)
     }
-    pub fn rolling_mean(&self, values: &[f64], window: usize) -> StatsResult<Vec<f64>> {
+    pub fn rolling_mean(&self, values: &[f64], window: usize) -> StockTrekResult<Vec<f64>> {
         transformation::rolling_mean(values, window)
     }
     pub fn rolling_standard_deviation(
         &self,
         values: &[f64],
         window: usize,
-    ) -> StatsResult<Vec<f64>> {
+    ) -> StockTrekResult<Vec<f64>> {
         transformation::rolling_standard_deviation(values, window)
     }
-    pub fn seasonal_difference(&self, values: &[f64], period: usize) -> StatsResult<Vec<f64>> {
+    pub fn seasonal_difference(&self, values: &[f64], period: usize) -> StockTrekResult<Vec<f64>> {
         transformation::seasonal_difference(values, period)
     }
 }
 
-pub fn box_cox(values: &[f64], lambda: f64) -> StatsResult<Vec<f64>> {
+pub fn box_cox(values: &[f64], lambda: f64) -> StockTrekResult<Vec<f64>> {
     if values.is_empty() {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     let mut result = Vec::with_capacity(values.len());
     for &x in values {
         if x <= 0.0 {
-            return Err(StatsError::DomainError {
+            return Err(StockTrekError::Stats(StatsError::DomainError {
                 message: "Box-Cox requires positive values".into(),
-            });
+            }));
         }
         if lambda == 0.0 {
             result.push(x.ln());
@@ -56,10 +60,10 @@ pub fn box_cox(values: &[f64], lambda: f64) -> StatsResult<Vec<f64>> {
     Ok(result)
 }
 
-pub fn detrend_linear(values: &[f64]) -> StatsResult<Vec<f64>> {
+pub fn detrend_linear(values: &[f64]) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     let x: Vec<f64> = (0..n).map(|i| i as f64).collect();
     let mean_x = stats::mean(&x)?;
@@ -77,7 +81,7 @@ pub fn detrend_linear(values: &[f64]) -> StatsResult<Vec<f64>> {
         })
         .sum();
     if denominator == 0.0 {
-        return Err(StatsError::ZeroVariance);
+        return Err(StockTrekError::Stats(StatsError::ZeroVariance));
     }
     let slope = numerator / denominator;
     let intercept = mean_y - slope * mean_x;
@@ -89,16 +93,18 @@ pub fn detrend_linear(values: &[f64]) -> StatsResult<Vec<f64>> {
     Ok(detrended)
 }
 
-pub fn difference(values: &[f64], order: usize) -> StatsResult<Vec<f64>> {
+pub fn difference(values: &[f64], order: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     if order == 0 {
         return Ok(values.to_vec());
     }
     if order >= n {
-        return Err(StatsError::InsufficientDegreesOfFreedom);
+        return Err(StockTrekError::Stats(
+            StatsError::InsufficientDegreesOfFreedom,
+        ));
     }
     let mut result = values.to_vec();
     for _ in 0..order {
@@ -107,10 +113,10 @@ pub fn difference(values: &[f64], order: usize) -> StatsResult<Vec<f64>> {
     Ok(result)
 }
 
-pub fn lag(values: &[f64], lag: usize) -> StatsResult<Vec<Option<f64>>> {
+pub fn lag(values: &[f64], lag: usize) -> StockTrekResult<Vec<Option<f64>>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     let mut result = Vec::with_capacity(n);
     for i in 0..n {
@@ -123,29 +129,29 @@ pub fn lag(values: &[f64], lag: usize) -> StatsResult<Vec<Option<f64>>> {
     Ok(result)
 }
 
-pub fn logarithm(values: &[f64]) -> StatsResult<Vec<f64>> {
+pub fn logarithm(values: &[f64]) -> StockTrekResult<Vec<f64>> {
     if values.is_empty() {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     let mut result = Vec::with_capacity(values.len());
     for &x in values {
         if x <= 0.0 {
-            return Err(StatsError::DomainError {
+            return Err(StockTrekError::Stats(StatsError::DomainError {
                 message: "log undefined for non-positive values".into(),
-            });
+            }));
         }
         result.push(x.ln());
     }
     Ok(result)
 }
 
-pub fn rolling_mean(values: &[f64], window: usize) -> StatsResult<Vec<f64>> {
+pub fn rolling_mean(values: &[f64], window: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     if window == 0 || window > n {
-        return Err(StatsError::InvalidLag);
+        return Err(StockTrekError::Stats(StatsError::InvalidLag));
     }
     let result: Vec<f64> = values
         .windows(window)
@@ -154,13 +160,13 @@ pub fn rolling_mean(values: &[f64], window: usize) -> StatsResult<Vec<f64>> {
     Ok(result)
 }
 
-pub fn rolling_standard_deviation(values: &[f64], window: usize) -> StatsResult<Vec<f64>> {
+pub fn rolling_standard_deviation(values: &[f64], window: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     if window == 0 || window > n {
-        return Err(StatsError::InvalidLag);
+        return Err(StockTrekError::Stats(StatsError::InvalidLag));
     }
     let mut result = Vec::with_capacity(n - window + 1);
     for w in values.windows(window) {
@@ -170,13 +176,13 @@ pub fn rolling_standard_deviation(values: &[f64], window: usize) -> StatsResult<
     Ok(result)
 }
 
-pub fn seasonal_difference(values: &[f64], period: usize) -> StatsResult<Vec<f64>> {
+pub fn seasonal_difference(values: &[f64], period: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StatsError::EmptyInput);
+        return Err(StockTrekError::Stats(StatsError::EmptyInput));
     }
     if period == 0 || period >= n {
-        return Err(StatsError::InvalidLag);
+        return Err(StockTrekError::Stats(StatsError::InvalidLag));
     }
     let result: Vec<f64> = (period..n)
         .map(|i| values[i] - values[i - period])

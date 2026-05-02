@@ -1,6 +1,6 @@
 use larpa::Command;
 use std::process::ExitCode;
-use stock_trek::verification::verify::verify;
+use stock_trek::{error::result::StockTrekError, verification::verify::verify};
 
 #[derive(Command)]
 #[larpa(
@@ -27,13 +27,17 @@ fn main() -> ExitCode {
     let cli = Cli::from_args();
     match cli.command {
         Commands::Verify { file } => match verify(file) {
-            Err(e) => {
+            Err(StockTrekError::Verification(e)) => {
                 e.errors.iter().for_each(|error| println!("{}", error));
                 ExitCode::from(e.exit_code)
             }
             Ok(..) => {
                 println!("This code is supported for use with stock-trek.com, happy signalling!");
                 ExitCode::SUCCESS
+            }
+            Err(e) => {
+                println!("Error {:?}", e);
+                ExitCode::FAILURE
             }
         },
     }

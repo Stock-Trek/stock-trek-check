@@ -17,3 +17,23 @@ pub struct ResolverContext {
     pub resolvers: ResolversFactory,
     pub scratch_pad: ScratchPadValuesFactory,
 }
+
+impl ResolverContext {
+    pub fn new() -> Self {
+        Self {
+            actions: ActionsFactory {},
+            calculations: CalculationValuesFactory {},
+            literals: LiteralValuesFactory {},
+            portfolio: PortfolioValuesFactory {},
+            predicates: PredicatesFactory {},
+            resolvers: ResolversFactory {},
+            scratch_pad: ScratchPadValuesFactory {},
+        }
+    }
+}
+
+impl Default for ResolverContext {
+    fn default() -> Self {
+        Self::new()
+    }
+}

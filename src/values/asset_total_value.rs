@@ -1,8 +1,8 @@
 use crate::{
+    error::result::StockTrekResult,
     resolved_context::ResolvedContext,
     values::value::{AssetValue, NumberValue, NumberValueTrait},
 };
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -18,7 +18,7 @@ impl AssetTotalValue {
 
 #[typetag::serde]
 impl NumberValueTrait for AssetTotalValue {
-    fn number(&self, context: &ResolvedContext) -> Result<f64> {
+    fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64> {
         let asset = self.asset.asset(context)?;
         Ok(context.portfolio.asset_total(asset))
     }

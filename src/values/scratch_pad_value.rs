@@ -1,11 +1,11 @@
 use crate::{
+    error::result::StockTrekResult,
     resolved_context::ResolvedContext,
     values::value::{
         AssetValue, AssetValueTrait, ExchangeValue, ExchangeValueTrait, FlagValue, FlagValueTrait,
         NumberValue, NumberValueTrait,
     },
 };
-use anyhow::Result;
 use digdigdig3::{Asset, ExchangeId};
 use serde::{Deserialize, Serialize};
 
@@ -22,7 +22,7 @@ impl ScratchPadAssetValue {
 
 #[typetag::serde]
 impl AssetValueTrait for ScratchPadAssetValue {
-    fn asset(&self, context: &ResolvedContext) -> Result<Asset> {
+    fn asset(&self, context: &ResolvedContext) -> StockTrekResult<Asset> {
         context.scratch_pad.read_asset_required(&self.key)
     }
 }
@@ -40,7 +40,7 @@ impl ScratchPadExchangeValue {
 
 #[typetag::serde]
 impl ExchangeValueTrait for ScratchPadExchangeValue {
-    fn exchange(&self, context: &ResolvedContext) -> Result<ExchangeId> {
+    fn exchange(&self, context: &ResolvedContext) -> StockTrekResult<ExchangeId> {
         context.scratch_pad.read_exchange_required(&self.key)
     }
 }
@@ -58,7 +58,7 @@ impl ScratchPadFlagValue {
 
 #[typetag::serde]
 impl FlagValueTrait for ScratchPadFlagValue {
-    fn flag(&self, context: &ResolvedContext) -> Result<bool> {
+    fn flag(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
         context.scratch_pad.read_flag_required(&self.key)
     }
 }
@@ -76,7 +76,7 @@ impl ScratchPadNumberValue {
 
 #[typetag::serde]
 impl NumberValueTrait for ScratchPadNumberValue {
-    fn number(&self, context: &ResolvedContext) -> Result<f64> {
+    fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64> {
         context.scratch_pad.read_number_required(&self.key)
     }
 }

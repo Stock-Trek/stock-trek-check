@@ -1,9 +1,9 @@
 use crate::{
     actions::action::Action,
+    error::result::StockTrekResult,
     resolved_context::ResolvedContext,
     resolvers::resolver::{Resolver, ResolverTrait},
 };
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -19,7 +19,7 @@ impl ListResolver {
 
 #[typetag::serde]
 impl ResolverTrait for ListResolver {
-    fn resolve(&self, context: &ResolvedContext, actions: &mut Vec<Action>) -> Result<()> {
+    fn resolve(&self, context: &ResolvedContext, actions: &mut Vec<Action>) -> StockTrekResult<()> {
         for assembler in &self.assemblers {
             assembler.resolve(context, actions)?;
         }

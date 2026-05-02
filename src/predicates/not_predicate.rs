@@ -1,8 +1,8 @@
 use crate::{
+    error::result::StockTrekResult,
     predicates::predicate::{Predicate, PredicateTrait},
     resolved_context::ResolvedContext,
 };
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -18,7 +18,7 @@ impl NotPredicate {
 
 #[typetag::serde]
 impl PredicateTrait for NotPredicate {
-    fn test(&self, context: &ResolvedContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
         let test_result = self.predicate.test(context)?;
         Ok(!test_result)
     }

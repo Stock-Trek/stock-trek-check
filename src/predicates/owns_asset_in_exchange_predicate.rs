@@ -1,8 +1,8 @@
 use crate::{
+    error::result::StockTrekResult,
     predicates::predicate::{Predicate, PredicateTrait},
     resolved_context::ResolvedContext,
 };
-use anyhow::Result;
 use digdigdig3::{Asset, ExchangeId};
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +20,7 @@ impl OwnsAssetInExchangePredicate {
 
 #[typetag::serde]
 impl PredicateTrait for OwnsAssetInExchangePredicate {
-    fn test(&self, context: &ResolvedContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
         Ok(context
             .portfolio
             .owns_asset_in_exchange(&self.asset, &self.exchange))

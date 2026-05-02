@@ -1,4 +1,5 @@
 pub mod actions;
+pub mod error;
 pub mod examples;
 pub mod exchanges;
 pub mod market_data;
@@ -17,8 +18,12 @@ pub mod verification;
 
 pub mod prelude {
     pub use crate::{
-        resolver_context::ResolverContext, resolvers::resolver::Resolver, scratch_pad::ScratchPad,
-        strategy::Strategy, strategy_context::StrategyContext,
+        error::result::{StockTrekError, StockTrekResult},
+        resolver_context::ResolverContext,
+        resolvers::resolver::Resolver,
+        scratch_pad::ScratchPad,
+        strategy::Strategy,
+        strategy_context::StrategyContext,
     };
 
     pub use digdigdig3::{

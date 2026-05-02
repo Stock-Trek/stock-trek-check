@@ -2,8 +2,6 @@ use crate::values::{
     asset_in_exchange_value::AssetInExchangeValue,
     asset_total_value::AssetTotalValue,
     binary_calculation_value::{BinaryCalculationValue, BinaryOperator},
-    cash_in_exchange_value::CashInExchangeValue,
-    cash_total_value::CashTotalValue,
     literal_value::{
         LiteralAssetValue, LiteralExchangeValue, LiteralFlagValue, LiteralNumberValue,
     },
@@ -26,12 +24,6 @@ impl PortfolioValuesFactory {
     }
     pub fn asset_total(&self, asset: AssetValue) -> NumberValue {
         AssetTotalValue::new(asset)
-    }
-    pub fn cash_in_exchange(&self, exchange: ExchangeValue) -> NumberValue {
-        CashInExchangeValue::new(exchange)
-    }
-    pub fn cash_total(&self) -> NumberValue {
-        CashTotalValue::new()
     }
 }
 

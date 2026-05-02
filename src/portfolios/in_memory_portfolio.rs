@@ -1,10 +1,27 @@
-use crate::portfolios::portfolio::{Portfolio, PortfolioTrait};
-use anyhow::{anyhow, bail, Result};
+use crate::{
+    error::{
+        portfolio::PortfolioError,
+        result::{StockTrekError, StockTrekResult},
+    },
+    portfolios::portfolio::{Portfolio, PortfolioTrait},
+};
 use digdigdig3::{Asset, ExchangeId};
 use std::collections::HashMap;
 
 pub struct InMemoryPortfolio {
     exchange_assets: HashMap<ExchangeId, Assets>,
+}
+
+struct Assets {
+    tokens: HashMap<Asset, f64>,
+}
+
+impl Assets {
+    fn new() -> Self {
+        Self {
+            tokens: HashMap::new(),
+        }
+    }
 }
 
 impl InMemoryPortfolio {
@@ -13,32 +30,12 @@ impl InMemoryPortfolio {
             exchange_assets: HashMap::new(),
         })
     }
-    pub fn add_cash(&mut self, exchange_id: ExchangeId, cash: f64) {
-        let exchange = self
-            .exchange_assets
-            .entry(exchange_id)
-            .or_insert(Assets::new());
-        exchange.cash += cash;
-    }
-    pub fn remove_cash(&mut self, exchange_id: ExchangeId, cash: f64) -> Result<()> {
-        let exchange = self.exchange_assets.get_mut(&exchange_id);
-        match exchange {
-            None => bail!("Portfolio has not used exchange {:?}", exchange_id),
-            Some(assets) => {
-                if assets.cash < cash {
-                    bail!(
-                        "Exchange {:?} has cash {} and cannot remove {}",
-                        exchange_id,
-                        assets.cash,
-                        cash
-                    )
-                }
-                assets.cash -= cash;
-                Ok(())
-            }
-        }
-    }
-    pub fn add_tokens(&mut self, exchange_id: ExchangeId, asset: Asset, quantity: f64) {
+    pub fn add_tokens(
+        &mut self,
+        exchange_id: ExchangeId,
+        asset: Asset,
+        quantity: f64,
+    ) -> StockTrekResult<()> {
         let exchange = self
             .exchange_assets
             .entry(exchange_id)
@@ -48,29 +45,32 @@ impl InMemoryPortfolio {
             .entry(asset)
             .and_modify(|previous| *previous += quantity)
             .or_insert(quantity);
+        Ok(())
     }
     pub fn remove_tokens(
         &mut self,
         exchange_id: ExchangeId,
         asset: Asset,
         quantity: f64,
-    ) -> Result<()> {
-        let exchange = self
-            .exchange_assets
-            .get_mut(&exchange_id)
-            .ok_or_else(|| anyhow!("Portfolio has not used exchange {:?}", exchange_id))?;
-        let token_quantity = exchange
-            .tokens
-            .get_mut(&asset)
-            .ok_or_else(|| anyhow!("Exchange {:?} does not have asset {:?}", exchange_id, asset))?;
+    ) -> StockTrekResult<()> {
+        let exchange = self.exchange_assets.get_mut(&exchange_id).ok_or_else(|| {
+            StockTrekError::Portfolio(PortfolioError::NoAccountInExchange {
+                exchange: exchange_id.as_str().to_string(),
+            })
+        })?;
+        let token_quantity = exchange.tokens.get_mut(&asset).ok_or_else(|| {
+            StockTrekError::Portfolio(PortfolioError::AssetNotOwned {
+                exchange: exchange_id.as_str().to_string(),
+                asset: asset.clone(),
+            })
+        })?;
         if *token_quantity < quantity {
-            bail!(
-                "Exchange {:?} has {} of asset {:?} and cannot remove {}",
-                exchange_id,
-                token_quantity,
+            return Err(StockTrekError::Portfolio(PortfolioError::NotEnoughTokens {
+                exchange: exchange_id.as_str().to_string(),
                 asset,
-                quantity
-            );
+                tokens: *token_quantity,
+                remove_request: quantity,
+            }));
         }
         *token_quantity -= quantity;
         if *token_quantity == 0.0 {
@@ -81,15 +81,6 @@ impl InMemoryPortfolio {
 }
 
 impl PortfolioTrait for InMemoryPortfolio {
-    fn cash_total(&self) -> f64 {
-        self.exchange_assets.values().map(|e| e.cash).sum()
-    }
-    fn cash_in_exchange(&self, exchange: ExchangeId) -> f64 {
-        self.exchange_assets
-            .get(&exchange)
-            .map(|e| e.cash)
-            .unwrap_or(0.0)
-    }
     fn has_account_in_exchange(&self, exchange: ExchangeId) -> bool {
         self.exchange_assets.contains_key(&exchange)
     }
@@ -116,19 +107,5 @@ impl PortfolioTrait for InMemoryPortfolio {
             .and_then(|assets| assets.tokens.get(&asset))
             .copied()
             .unwrap_or(0.0)
-    }
-}
-
-struct Assets {
-    cash: f64,
-    tokens: HashMap<Asset, f64>,
-}
-
-impl Assets {
-    fn new() -> Self {
-        Self {
-            cash: 0.0,
-            tokens: HashMap::new(),
-        }
     }
 }

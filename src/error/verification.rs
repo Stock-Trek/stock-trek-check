@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct VerificationError {
     pub exit_code: u8,
     pub errors: Vec<String>,

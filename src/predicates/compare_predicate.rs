@@ -1,10 +1,13 @@
 use crate::{
+    error::{
+        general::GeneralError,
+        result::{StockTrekError, StockTrekResult},
+    },
     predicates::predicate::{Predicate, PredicateTrait},
     resolved_context::ResolvedContext,
     util::serde_ordering,
     values::value::NumberValue,
 };
-use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
@@ -28,14 +31,17 @@ impl ComparePredicate {
 
 #[typetag::serde]
 impl PredicateTrait for ComparePredicate {
-    fn test(&self, context: &ResolvedContext) -> Result<bool> {
+    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
         let left_value = self.left.number(context)?;
         let right_value = self.right.number(context)?;
         match left_value.partial_cmp(&right_value) {
             Some(Ordering::Less) => Ok(self.comparison.is_le()),
             Some(Ordering::Equal) => Ok(self.comparison.is_eq()),
             Some(Ordering::Greater) => Ok(self.comparison.is_ge()),
-            None => bail!("Failed to compare {} and {}", left_value, right_value),
+            None => Err(StockTrekError::General(GeneralError::Message(format!(
+                "Failed to compare {} and {}",
+                left_value, right_value
+            )))),
         }
     }
 }

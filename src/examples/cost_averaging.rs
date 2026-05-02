@@ -15,7 +15,7 @@ pub struct CostAveraging {}
 
 #[register_strategy(default)]
 impl Strategy for CostAveraging {
-    fn market_calculations(&self, context: StrategyContext) -> anyhow::Result<ScratchPad> {
+    fn market_calculations(&self, context: StrategyContext) -> StockTrekResult<ScratchPad> {
         let mut scratch_pad = ScratchPad::new();
         if let Some(binance) = context.exchanges.get(&ExchangeId::Binance) {
             let btc_usdt = context.symbol(BTC, USDT);
@@ -28,7 +28,7 @@ impl Strategy for CostAveraging {
         }
         Ok(scratch_pad)
     }
-    fn action_resolver(&self, context: ResolverContext) -> anyhow::Result<Resolver> {
+    fn action_resolver(&self, context: ResolverContext) -> StockTrekResult<Resolver> {
         let exchange = ExchangeId::Binance;
         let satoshi_price = context
             .scratch_pad

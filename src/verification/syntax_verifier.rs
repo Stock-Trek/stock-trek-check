@@ -1,11 +1,11 @@
-use std::collections::{BTreeMap, BTreeSet};
-
-use crate::verification::{
-    node_location::NodeLocation,
-    policy::SyntaxPolicy,
-    verification_error::{VerificationError, BLOCKED_SYNTAX_ERROR, PARSE_ERROR},
-    verifier_map::VerifierMap,
+use crate::{
+    error::{
+        result::{StockTrekError, StockTrekResult},
+        verification::{VerificationError, BLOCKED_SYNTAX_ERROR, PARSE_ERROR},
+    },
+    verification::{node_location::NodeLocation, policy::SyntaxPolicy, verifier_map::VerifierMap},
 };
+use std::collections::{BTreeMap, BTreeSet};
 
 pub struct SyntaxVerifier {
     verifiers: VerifierMap,
@@ -19,12 +19,12 @@ impl SyntaxVerifier {
             blocked_node_locations: BTreeMap::new(),
         }
     }
-    pub fn verify(&mut self, code: &str) -> Result<(), VerificationError> {
+    pub fn verify(&mut self, code: &str) -> StockTrekResult<()> {
         match syn::parse_file(code) {
-            Err(e) => Err(VerificationError {
+            Err(e) => Err(StockTrekError::Verification(VerificationError {
                 exit_code: PARSE_ERROR,
                 errors: vec![format!("Error when parsing code: {}", e)],
-            }),
+            })),
             Ok(ast) => {
                 syn::visit::Visit::visit_file(self, &ast);
                 // let blocked_node_locations = self.verifiers.blocked_node_locations();
@@ -49,10 +49,10 @@ impl SyntaxVerifier {
                             )
                         })
                         .collect();
-                    Err(VerificationError {
+                    Err(StockTrekError::Verification(VerificationError {
                         exit_code: BLOCKED_SYNTAX_ERROR,
                         errors,
-                    })
+                    }))
                 }
             }
         }
