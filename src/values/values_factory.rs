@@ -1,17 +1,18 @@
-use crate::values::{
-    asset_in_exchange_value::AssetInExchangeValue,
-    asset_total_value::AssetTotalValue,
-    binary_calculation_value::{BinaryCalculationValue, BinaryOperator},
-    literal_value::{
-        LiteralAssetValue, LiteralExchangeValue, LiteralFlagValue, LiteralNumberValue,
+use crate::{
+    scratch_pad::key::ScratchKey,
+    values::{
+        asset_in_exchange_value::AssetInExchangeValue,
+        asset_total_value::AssetTotalValue,
+        binary_calculation_value::{BinaryCalculationValue, BinaryOperator},
+        literal_value::{
+            LiteralAssetValue, LiteralExchangeValue, LiteralFlagValue, LiteralNumberValue,
+        },
+        scratch_pad_value::ScratchPadValue,
+        unary_calculation_value::{UnaryCalculationValue, UnaryOperator},
+        value::{AssetValue, ExchangeValue, FlagValue, NumberValue},
     },
-    scratch_pad_value::{
-        ScratchPadAssetValue, ScratchPadExchangeValue, ScratchPadFlagValue, ScratchPadNumberValue,
-    },
-    unary_calculation_value::{UnaryCalculationValue, UnaryOperator},
-    value::{AssetValue, ExchangeValue, FlagValue, NumberValue},
 };
-use digdigdig3::ExchangeId;
+use digdigdig3::{Asset, ExchangeId};
 
 pub struct PortfolioValuesFactory {}
 pub struct CalculationValuesFactory {}
@@ -57,16 +58,16 @@ impl LiteralValuesFactory {
 }
 
 impl ScratchPadValuesFactory {
-    pub fn asset(&self, key: impl AsRef<str>) -> AssetValue {
-        ScratchPadAssetValue::new(key.as_ref().to_string())
+    pub fn asset(&self, key: &ScratchKey<Asset>) -> AssetValue {
+        ScratchPadValue::new(key.key())
     }
-    pub fn exchange(&self, key: impl AsRef<str>) -> ExchangeValue {
-        ScratchPadExchangeValue::new(key.as_ref().to_string())
+    pub fn exchange(&self, key: &ScratchKey<ExchangeId>) -> ExchangeValue {
+        ScratchPadValue::new(key.key())
     }
-    pub fn flag(&self, key: impl AsRef<str>) -> FlagValue {
-        ScratchPadFlagValue::new(key.as_ref().to_string())
+    pub fn flag(&self, key: &ScratchKey<bool>) -> FlagValue {
+        ScratchPadValue::new(key.key())
     }
-    pub fn number(&self, key: impl AsRef<str>) -> NumberValue {
-        ScratchPadNumberValue::new(key.as_ref().to_string())
+    pub fn number(&self, key: &ScratchKey<f64>) -> NumberValue {
+        ScratchPadValue::new(key.key())
     }
 }

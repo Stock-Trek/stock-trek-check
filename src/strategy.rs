@@ -1,6 +1,7 @@
 use crate::{
     error::result::StockTrekResult, resolver_context::ResolverContext,
-    resolvers::resolver::Resolver, scratch_pad::ScratchPad, strategy_context::StrategyContext,
+    resolvers::resolver::Resolver, scratch_pad::scratch_pad::ScratchPad,
+    strategy_context::StrategyContext,
 };
 
 pub trait Strategy: Send + Sync {

@@ -21,7 +21,7 @@ pub mod prelude {
         error::result::{StockTrekError, StockTrekResult},
         resolver_context::ResolverContext,
         resolvers::resolver::Resolver,
-        scratch_pad::ScratchPad,
+        scratch_pad::{key::ScratchKey, scratch_pad::ScratchPad, value::ScratchValue},
         strategy::Strategy,
         strategy_context::StrategyContext,
     };

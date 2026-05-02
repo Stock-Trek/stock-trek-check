@@ -1,17 +1,20 @@
 use crate::prelude::*;
 use std::cmp::Ordering;
-use strum::{Display, EnumString};
 
 const BTC: &str = "BTC";
 const USDT: &str = "USDT";
 
-#[derive(Display, EnumString)]
-pub enum ScratchPadKey {
-    SatoshiPrice,
+pub struct CostAveraging {
+    key_satoshi_price: ScratchKey<f64>,
 }
 
-#[derive(Default)]
-pub struct CostAveraging {}
+impl Default for CostAveraging {
+    fn default() -> Self {
+        Self {
+            key_satoshi_price: ScratchKey::new("SATOSHI_PRICE"),
+        }
+    }
+}
 
 #[register_strategy(default)]
 impl Strategy for CostAveraging {
@@ -21,18 +24,15 @@ impl Strategy for CostAveraging {
             let btc_usdt = context.symbol(BTC, USDT);
             let market_opt = binance.market_for(&btc_usdt)?;
             if let Some(market) = market_opt {
-                let key = ScratchPadKey::SatoshiPrice.to_string();
                 let satoshi_price = market.ticks.ticks[0].last.price / 1_000_000.0;
-                scratch_pad.write_number(key, satoshi_price);
+                scratch_pad.write(&self.key_satoshi_price, satoshi_price);
             }
         }
         Ok(scratch_pad)
     }
     fn action_resolver(&self, context: ResolverContext) -> StockTrekResult<Resolver> {
         let exchange = ExchangeId::Binance;
-        let satoshi_price = context
-            .scratch_pad
-            .number(ScratchPadKey::SatoshiPrice.to_string());
+        let satoshi_price = context.scratch_pad.number(&self.key_satoshi_price);
         let usdt = context.portfolio.asset_in_exchange(
             context.literals.exchange(exchange),
             context.literals.asset(USDT),

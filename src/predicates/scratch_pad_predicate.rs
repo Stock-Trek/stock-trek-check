@@ -2,6 +2,7 @@ use crate::{
     error::result::StockTrekResult,
     predicates::predicate::{Predicate, PredicateTrait},
     resolved_context::ResolvedContext,
+    scratch_pad::key::ScratchKey,
 };
 use serde::{Deserialize, Serialize};
 
@@ -19,6 +20,6 @@ impl ScratchPadPredicate {
 #[typetag::serde]
 impl PredicateTrait for ScratchPadPredicate {
     fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        context.scratch_pad.read_flag_required(&self.key)
+        context.scratch_pad.read(&ScratchKey::new(&self.key))
     }
 }

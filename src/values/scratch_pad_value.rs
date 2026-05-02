@@ -1,82 +1,53 @@
 use crate::{
-    error::result::StockTrekResult,
+    error::result::{StockTrekError, StockTrekResult},
     resolved_context::ResolvedContext,
-    values::value::{
-        AssetValue, AssetValueTrait, ExchangeValue, ExchangeValueTrait, FlagValue, FlagValueTrait,
-        NumberValue, NumberValueTrait,
+    scratch_pad::{
+        key::{ScratchKey, ScratchPadKeyType},
+        value::ScratchValue,
     },
+    values::value::{AssetValueTrait, ExchangeValueTrait, FlagValueTrait, NumberValueTrait},
 };
 use digdigdig3::{Asset, ExchangeId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct ScratchPadAssetValue {
+pub struct ScratchPadValue {
     key: String,
 }
 
-impl ScratchPadAssetValue {
-    pub fn new(key: String) -> AssetValue {
+impl ScratchPadValue {
+    pub fn new(key: String) -> Box<Self> {
         Box::new(Self { key })
+    }
+    pub fn read<T>(&self, context: &ResolvedContext) -> StockTrekResult<T>
+    where
+        T: ScratchPadKeyType + Into<ScratchValue> + TryFrom<ScratchValue, Error = StockTrekError>,
+    {
+        context.scratch_pad.read(&ScratchKey::new(&self.key))
     }
 }
 
 #[typetag::serde]
-impl AssetValueTrait for ScratchPadAssetValue {
+impl AssetValueTrait for ScratchPadValue {
     fn asset(&self, context: &ResolvedContext) -> StockTrekResult<Asset> {
-        context.scratch_pad.read_asset_required(&self.key)
+        self.read(context)
     }
 }
-
-#[derive(Serialize, Deserialize)]
-pub struct ScratchPadExchangeValue {
-    key: String,
-}
-
-impl ScratchPadExchangeValue {
-    pub fn new(key: String) -> ExchangeValue {
-        Box::new(Self { key })
-    }
-}
-
 #[typetag::serde]
-impl ExchangeValueTrait for ScratchPadExchangeValue {
+impl ExchangeValueTrait for ScratchPadValue {
     fn exchange(&self, context: &ResolvedContext) -> StockTrekResult<ExchangeId> {
-        context.scratch_pad.read_exchange_required(&self.key)
+        self.read(context)
     }
 }
-
-#[derive(Serialize, Deserialize)]
-pub struct ScratchPadFlagValue {
-    key: String,
-}
-
-impl ScratchPadFlagValue {
-    pub fn new(key: String) -> FlagValue {
-        Box::new(Self { key })
-    }
-}
-
 #[typetag::serde]
-impl FlagValueTrait for ScratchPadFlagValue {
+impl FlagValueTrait for ScratchPadValue {
     fn flag(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        context.scratch_pad.read_flag_required(&self.key)
+        self.read(context)
     }
 }
-
-#[derive(Serialize, Deserialize)]
-pub struct ScratchPadNumberValue {
-    key: String,
-}
-
-impl ScratchPadNumberValue {
-    pub fn new(key: String) -> NumberValue {
-        Box::new(Self { key })
-    }
-}
-
 #[typetag::serde]
-impl NumberValueTrait for ScratchPadNumberValue {
+impl NumberValueTrait for ScratchPadValue {
     fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64> {
-        context.scratch_pad.read_number_required(&self.key)
+        self.read(context)
     }
 }
