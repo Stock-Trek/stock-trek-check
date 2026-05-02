@@ -6,9 +6,9 @@ use stock_trek::{error::result::StockTrekError, verification::verify::verify};
 #[larpa(
     name = "stock-trek",
     version = "1.0",
-    homepage = "https://github.com/Stock-Trek/PublicAPI",
+    homepage = "https://github.com/Stock-Trek/stock-trek",
     license = "MIT",
-    repository = "https://github.com/Stock-Trek/PublicAPI"
+    repository = "https://github.com/Stock-Trek/stock-trek"
 )]
 struct Cli {
     #[larpa(subcommand)]
