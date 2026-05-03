@@ -19,6 +19,9 @@ pub mod verification;
 pub mod prelude {
     pub use crate::{
         error::result::{StockTrekError, StockTrekResult},
+        exchanges::exchange_factory::ExchangeFactory,
+        portfolios::portfolio_factory::PortfolioFactory,
+        resolved_context::ResolvedContext,
         resolver_context::ResolverContext,
         resolvers::resolver::Resolver,
         scratch::{key::ScratchKey, scratch_pad::ScratchPad, value::ScratchValue},
