@@ -33,6 +33,9 @@ impl Strategy for CostAveraging {
         }
         Ok(scratch_pad)
     }
+    fn on_action_error(&self) -> OnActionError {
+        OnActionError::Halt
+    }
     fn action_resolver(&self, c: &ResolverContext) -> StockTrekResult<Resolver> {
         Ok(c.resolvers.if_else(
             c.predicates.scratch_pad(&self.key_market_exists),

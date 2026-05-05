@@ -23,7 +23,7 @@ pub mod prelude {
         portfolios::portfolio_factory::PortfolioFactory,
         resolved_context::ResolvedContext,
         resolver_context::ResolverContext,
-        resolvers::resolver::Resolver,
+        resolvers::{on_action_error::OnActionError, resolver::Resolver},
         scratch::{key::ScratchKey, scratch_pad::ScratchPad, value::ScratchValue},
         strategy::Strategy,
         strategy_context::StrategyContext,
