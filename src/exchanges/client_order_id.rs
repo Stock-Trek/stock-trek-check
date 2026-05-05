@@ -3,9 +3,9 @@ use digdigdig3::core::OrderRequest;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use uuid::Uuid;
 
-pub struct ClientOrderIdBuilder;
+pub struct ClientOrderId;
 
-impl ClientOrderIdBuilder {
+impl ClientOrderId {
     pub fn from(order_request: &OrderRequest) -> Option<String> {
         if let Some(existing) = order_request.client_order_id.clone() {
             return Some(existing);

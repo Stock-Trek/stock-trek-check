@@ -18,8 +18,8 @@ impl AssetTotalValue {
 
 #[typetag::serde]
 impl NumberValueTrait for AssetTotalValue {
-    fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64> {
-        let asset = self.asset.asset(context)?;
-        Ok(context.portfolio.asset_total(&asset))
+    fn number(&self, c: &ResolvedContext) -> StockTrekResult<f64> {
+        let asset = self.asset.asset(c)?;
+        Ok(c.portfolio.asset_total(&asset))
     }
 }

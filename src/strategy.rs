@@ -5,6 +5,6 @@ use crate::{
 };
 
 pub trait Strategy: Send + Sync {
-    fn market_calculations(&self, context: StrategyContext) -> StockTrekResult<ScratchPad>;
-    fn action_resolver(&self, context: ResolverContext) -> StockTrekResult<Resolver>;
+    fn market_calculations(&self, c: StrategyContext) -> StockTrekResult<ScratchPad>;
+    fn action_resolver(&self, c: ResolverContext) -> StockTrekResult<Resolver>;
 }

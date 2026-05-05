@@ -26,12 +26,12 @@ impl IfResolver {
 
 #[typetag::serde]
 impl ResolverTrait for IfResolver {
-    fn resolve(&self, context: &ResolvedContext, actions: &mut Vec<Action>) -> StockTrekResult<()> {
-        let predicate = self.condition.test(context)?;
+    fn resolve(&self, c: &ResolvedContext, actions: &mut Vec<Action>) -> StockTrekResult<()> {
+        let predicate = self.condition.test(c)?;
         if predicate {
-            self.if_true.resolve(context, actions)?;
+            self.if_true.resolve(c, actions)?;
         } else {
-            self.if_false.resolve(context, actions)?;
+            self.if_false.resolve(c, actions)?;
         }
         Ok(())
     }

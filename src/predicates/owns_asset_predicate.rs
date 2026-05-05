@@ -19,7 +19,7 @@ impl OwnsAssetPredicate {
 
 #[typetag::serde]
 impl PredicateTrait for OwnsAssetPredicate {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        Ok(context.portfolio.owns_asset(&self.asset))
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool> {
+        Ok(c.portfolio.owns_asset(&self.asset))
     }
 }

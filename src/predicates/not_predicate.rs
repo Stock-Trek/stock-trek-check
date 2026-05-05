@@ -18,8 +18,8 @@ impl NotPredicate {
 
 #[typetag::serde]
 impl PredicateTrait for NotPredicate {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        let test_result = self.predicate.test(context)?;
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool> {
+        let test_result = self.predicate.test(c)?;
         Ok(!test_result)
     }
 }

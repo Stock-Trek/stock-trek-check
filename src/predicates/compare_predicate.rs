@@ -31,9 +31,9 @@ impl ComparePredicate {
 
 #[typetag::serde]
 impl PredicateTrait for ComparePredicate {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        let left_value = self.left.number(context)?;
-        let right_value = self.right.number(context)?;
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool> {
+        let left_value = self.left.number(c)?;
+        let right_value = self.right.number(c)?;
         match left_value.partial_cmp(&right_value) {
             Some(Ordering::Less) => Ok(self.comparison.is_le()),
             Some(Ordering::Equal) => Ok(self.comparison.is_eq()),

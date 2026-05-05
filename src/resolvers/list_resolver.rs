@@ -19,9 +19,9 @@ impl ListResolver {
 
 #[typetag::serde]
 impl ResolverTrait for ListResolver {
-    fn resolve(&self, context: &ResolvedContext, actions: &mut Vec<Action>) -> StockTrekResult<()> {
+    fn resolve(&self, c: &ResolvedContext, actions: &mut Vec<Action>) -> StockTrekResult<()> {
         for assembler in &self.assemblers {
-            assembler.resolve(context, actions)?;
+            assembler.resolve(c, actions)?;
         }
         Ok(())
     }

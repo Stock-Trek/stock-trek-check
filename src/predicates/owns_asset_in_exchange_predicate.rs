@@ -20,9 +20,8 @@ impl OwnsAssetInExchangePredicate {
 
 #[typetag::serde]
 impl PredicateTrait for OwnsAssetInExchangePredicate {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        Ok(context
-            .portfolio
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool> {
+        Ok(c.portfolio
             .owns_asset_in_exchange(&self.asset, &self.exchange))
     }
 }

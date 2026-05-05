@@ -19,9 +19,9 @@ impl AssetInExchangeValue {
 
 #[typetag::serde]
 impl NumberValueTrait for AssetInExchangeValue {
-    fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64> {
-        let exchange = self.exchange.exchange(context)?;
-        let asset = self.asset.asset(context)?;
-        Ok(context.portfolio.asset_in_exchange(&asset, &exchange))
+    fn number(&self, c: &ResolvedContext) -> StockTrekResult<f64> {
+        let exchange = self.exchange.exchange(c)?;
+        let asset = self.asset.asset(c)?;
+        Ok(c.portfolio.asset_in_exchange(&asset, &exchange))
     }
 }

@@ -8,20 +8,20 @@ pub type NumberValue = Box<dyn NumberValueTrait>;
 
 #[typetag::serde]
 pub trait AssetValueTrait: Send + Sync {
-    fn asset(&self, context: &ResolvedContext) -> StockTrekResult<Asset>;
+    fn asset(&self, c: &ResolvedContext) -> StockTrekResult<Asset>;
 }
 
 #[typetag::serde]
 pub trait ExchangeValueTrait: Send + Sync {
-    fn exchange(&self, context: &ResolvedContext) -> StockTrekResult<ExchangeId>;
+    fn exchange(&self, c: &ResolvedContext) -> StockTrekResult<ExchangeId>;
 }
 
 #[typetag::serde]
 pub trait FlagValueTrait: Send + Sync {
-    fn flag(&self, context: &ResolvedContext) -> StockTrekResult<bool>;
+    fn flag(&self, c: &ResolvedContext) -> StockTrekResult<bool>;
 }
 
 #[typetag::serde]
 pub trait NumberValueTrait: Send + Sync {
-    fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64>;
+    fn number(&self, c: &ResolvedContext) -> StockTrekResult<f64>;
 }

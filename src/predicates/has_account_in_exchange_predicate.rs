@@ -19,7 +19,7 @@ impl HasAccountInExchangePredicate {
 
 #[typetag::serde]
 impl PredicateTrait for HasAccountInExchangePredicate {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        Ok(context.portfolio.has_account_in_exchange(&self.exchange))
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool> {
+        Ok(c.portfolio.has_account_in_exchange(&self.exchange))
     }
 }

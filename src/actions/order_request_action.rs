@@ -1,7 +1,10 @@
 use crate::{
     actions::action::{Action, ActionTrait},
-    error::result::StockTrekResult,
-    exchanges::{client_order_id_builder::ClientOrderIdBuilder, exchange::Exchange},
+    error::{
+        result::{StockTrekError, StockTrekResult},
+        value::ValueError,
+    },
+    exchanges::exchange::Exchange,
 };
 use digdigdig3::{core::OrderRequest, ExchangeId};
 use serde::{Deserialize, Serialize};
@@ -27,8 +30,20 @@ impl ActionTrait for OrderRequestAction {
     fn clone_box(&self) -> Box<dyn ActionTrait> {
         Box::new(self.clone())
     }
-    fn complete(&mut self, exchanges: &HashMap<ExchangeId, Exchange>) -> StockTrekResult<()> {
-        self.order_request.client_order_id = ClientOrderIdBuilder::from(&self.order_request);
-        self.try_place_order(exchanges, &self.exchange, &self.order_request)
+    fn complete(
+        &self,
+        bot_id: &String,
+        exchanges: &HashMap<ExchangeId, Exchange>,
+    ) -> StockTrekResult<()> {
+        if let Some(exchange) = exchanges.get(&self.exchange) {
+            let order = exchange.place_order(bot_id, &self.order_request)?;
+            println!("{:?}", order);
+            Ok(())
+        } else {
+            Err(StockTrekError::Value(ValueError::NotFound {
+                name: "Exchange".to_string(),
+                key: self.exchange.as_str().to_string(),
+            }))
+        }
     }
 }

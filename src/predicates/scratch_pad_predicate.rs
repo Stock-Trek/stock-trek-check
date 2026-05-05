@@ -5,7 +5,7 @@ use crate::{
 
 #[typetag::serde]
 impl PredicateTrait for ScratchKey<bool> {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
-        context.scratch_pad.read(self)
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool> {
+        c.scratch_pad.read(self)
     }
 }

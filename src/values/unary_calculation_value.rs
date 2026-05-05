@@ -52,8 +52,8 @@ impl UnaryCalculationValue {
 
 #[typetag::serde]
 impl NumberValueTrait for UnaryCalculationValue {
-    fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64> {
-        let value = self.number.number(context)?;
+    fn number(&self, c: &ResolvedContext) -> StockTrekResult<f64> {
+        let value = self.number.number(c)?;
         let calculation_result = match self.operator {
             UnaryOperator::Abs => value.abs(),
             UnaryOperator::Acos => {

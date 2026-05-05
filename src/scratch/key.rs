@@ -1,5 +1,6 @@
 use crate::{
-    error::result::StockTrekError, prelude::StockTrekResult, resolved_context::ResolvedContext,
+    error::result::{StockTrekError, StockTrekResult},
+    resolved_context::ResolvedContext,
     scratch::value::ScratchValue,
 };
 use digdigdig3::{Asset, ExchangeId};
@@ -52,8 +53,8 @@ where
     pub fn default(&self) -> Option<T> {
         self.default.clone()
     }
-    pub fn read(&self, context: &ResolvedContext) -> StockTrekResult<T> {
-        context.scratch_pad.read(self)
+    pub fn read(&self, c: &ResolvedContext) -> StockTrekResult<T> {
+        c.scratch_pad.read(self)
     }
 }
 

@@ -30,7 +30,7 @@ impl QuantityOfPredicate {
 
 #[typetag::serde]
 impl PredicateTrait for QuantityOfPredicate {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool> {
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool> {
         if self.predicates.is_empty() {
             let empty_result = match self.quantity_of {
                 QuantityOf::All => true,
@@ -43,7 +43,7 @@ impl PredicateTrait for QuantityOfPredicate {
         let mut true_count = 0;
         let mut false_count = 0;
         for predicate in &self.predicates {
-            if predicate.test(context)? {
+            if predicate.test(c)? {
                 true_count += 1;
             } else {
                 false_count += 1;

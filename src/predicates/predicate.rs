@@ -4,5 +4,5 @@ pub type Predicate = Box<dyn PredicateTrait>;
 
 #[typetag::serde]
 pub trait PredicateTrait: Send + Sync {
-    fn test(&self, context: &ResolvedContext) -> StockTrekResult<bool>;
+    fn test(&self, c: &ResolvedContext) -> StockTrekResult<bool>;
 }

@@ -39,9 +39,9 @@ impl BinaryCalculationValue {
 
 #[typetag::serde]
 impl NumberValueTrait for BinaryCalculationValue {
-    fn number(&self, context: &ResolvedContext) -> StockTrekResult<f64> {
-        let left_value = self.left.number(context)?;
-        let right_value = self.right.number(context)?;
+    fn number(&self, c: &ResolvedContext) -> StockTrekResult<f64> {
+        let left_value = self.left.number(c)?;
+        let right_value = self.right.number(c)?;
         let calculation_result = match self.operator {
             BinaryOperator::Add => left_value + right_value,
             BinaryOperator::Atan2 => left_value.atan2(right_value),

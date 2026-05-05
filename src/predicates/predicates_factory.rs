@@ -8,7 +8,7 @@ use crate::{
         predicate::Predicate,
         quantity_of_predicate::{QuantityOf, QuantityOfPredicate},
     },
-    prelude::ScratchKey,
+    scratch::key::ScratchKey,
     values::value::NumberValue,
 };
 use digdigdig3::ExchangeId;
