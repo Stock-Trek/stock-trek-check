@@ -54,7 +54,7 @@ impl Default for CostAveraging {
 
 #[register_strategy(default)]
 impl Strategy for CostAveraging {
-    fn market_calculations(&self, c: StrategyContext) -> StockTrekResult<ScratchPad> {
+    fn market_calculations(&self, c: &StrategyContext) -> StockTrekResult<ScratchPad> {
         let mut scratch_pad = ScratchPad::new();
         if let Some(binance) = c.exchanges.get(&ExchangeId::Binance) {
             let btc_usdt = c.symbol(BTC, USDT);
@@ -67,7 +67,7 @@ impl Strategy for CostAveraging {
         }
         Ok(scratch_pad)
     }
-    fn action_resolver(&self, c: ResolverContext) -> StockTrekResult<Resolver> {
+    fn action_resolver(&self, c: &ResolverContext) -> StockTrekResult<Resolver> {
         Ok(c.resolvers.if_else(
             c.predicates.scratch_pad(&self.key_market_exists),
             c.resolvers.if_else(
