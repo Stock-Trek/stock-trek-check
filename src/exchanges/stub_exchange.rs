@@ -5,7 +5,7 @@ use crate::{
         exchange::{Exchange, ExchangeTrait},
     },
     order::{order_request::OrderRequest, order_response::OrderResponse},
-    values::value::{NumberValue, TokenValue},
+    scratch::key::TokenName,
 };
 
 pub struct StubExchange;
@@ -20,7 +20,7 @@ impl ExchangeTrait for StubExchange {
     fn place_order(
         &self,
         _bot_id: &BotId,
-        _order_request: &OrderRequest<TokenValue, NumberValue>,
+        _order_request: &OrderRequest<TokenName, f64>,
     ) -> StockTrekResult<OrderResponse> {
         let response = OrderResponse {
             // TODO

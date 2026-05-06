@@ -5,7 +5,10 @@ use crate::{
     },
     order::order_request::OrderRequest,
     resolved_context::ResolvedContext,
-    resolvers::resolver::{Resolver, ResolverTrait},
+    resolvers::{
+        resolveable::Resolvable,
+        resolver::{Resolver, ResolverTrait},
+    },
     values::value::{ExchangeValue, NumberValue, TokenValue},
 };
 use serde::{Deserialize, Serialize};
@@ -33,7 +36,8 @@ impl ResolverTrait for PlaceOrderResolver {
     fn resolve(&self, c: &ResolvedContext) -> StockTrekResult<()> {
         let exchange = self.exchange_value.exchange(c)?;
         if let Some(exchange) = c.exchanges.get(&exchange) {
-            let order = exchange.place_order(&c.bot_id, &self.order_request)?;
+            let resolved_order_request = self.order_request.try_resolve(c)?;
+            let order = exchange.place_order(&c.bot_id, &resolved_order_request)?;
             println!("order {:?}", order);
             Ok(())
         } else {
