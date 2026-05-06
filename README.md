@@ -39,7 +39,6 @@ const BTC: &str = "BTC";
 const USDT: &str = "USDT";
 
 pub struct CostAveraging {
-    exchange_binance: ExchangeName,
     token_btc: TokenName,
     token_usdt: TokenName,
     key_exchange: ScratchKey<ExchangeName>,
@@ -51,7 +50,6 @@ pub struct CostAveraging {
 impl Default for CostAveraging {
     fn default() -> Self {
         Self {
-            exchange_binance: ExchangeName("Binance".into()),
             token_btc: TokenName(BTC.into()),
             token_usdt: TokenName(USDT.into()),
             key_exchange: ScratchKey::new_required("EXCHANGE"),
@@ -68,12 +66,16 @@ impl Strategy for CostAveraging {
         let mut scratch_pad = ScratchPad::new();
         let one_millionth = 1.0 / 1_000_000.0;
         scratch_pad.write(&self.key_satoshi_quantity, one_millionth);
-        if let Some(binance_bt_usdt) =
-            c.market_for(&self.exchange_binance, &self.token_btc, &self.token_usdt)
-        {
-            scratch_pad.write(&self.key_exchange, self.exchange_binance.clone());
+        let iter = c.exchange_markets_for(&self.token_btc, &self.token_usdt);
+        let min_by_last_ask = iter.min_by(|(_a_exch, a_market), (_b_exch, b_market)| {
+            let a_last_ask = a_market.ticks.ticks[0].ask.price;
+            let b_last_ask = b_market.ticks.ticks[0].ask.price;
+            a_last_ask.partial_cmp(&b_last_ask).unwrap()
+        });
+        if let Some((cheapest_exchange_name, market)) = min_by_last_ask {
             scratch_pad.write(&self.key_market_exists, true);
-            let satoshi_price = binance_bt_usdt.ticks.ticks[0].last.price / 1_000_000.0;
+            scratch_pad.write(&self.key_exchange, cheapest_exchange_name);
+            let satoshi_price = market.ticks.ticks[0].ask.price / 1_000_000.0;
             scratch_pad.write(&self.key_satoshi_price, satoshi_price);
         }
         Ok(scratch_pad)
