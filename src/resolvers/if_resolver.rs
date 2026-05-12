@@ -1,5 +1,6 @@
 use crate::{
     error::result::StockTrekResult,
+    execute::capability::{combine_capabilities, Capability, HasRequiredCapabilities},
     predicates::predicate::Predicate,
     resolved_context::ResolvedContext,
     resolvers::resolver::{Resolver, ResolverTrait},
@@ -33,5 +34,11 @@ impl ResolverTrait for IfResolver {
             self.if_false.resolve(c)?;
         }
         Ok(())
+    }
+}
+
+impl HasRequiredCapabilities for IfResolver {
+    fn required_capabilities(&self) -> Vec<Capability> {
+        combine_capabilities(&[self.if_false.as_ref(), self.if_true.as_ref()])
     }
 }

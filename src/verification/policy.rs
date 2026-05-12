@@ -1,6 +1,7 @@
 use crate::verification::node_location::NodeLocation;
+use strum::Display;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Display, Clone)]
 pub enum SyntaxPolicy {
     Allowed,
     Blocked(BlockedLocations),

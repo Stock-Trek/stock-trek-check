@@ -1,104 +1,66 @@
 use crate::{
     order::{
-        order_intent::OrderIntent, order_pricing::OrderPricing, order_quantity::OrderQuantity,
-        order_request::OrderRequest, order_side::OrderSide, order_time_in_force::OrderTimeInForce,
-        order_timing::OrderTiming, order_trigger_direction::OrderTriggerDirection,
-        single_order::SingleOrder,
+        order_activation::OrderActivation,
+        order_constraint::OrderConstraint,
+        order_intent::OrderIntent,
+        order_pricing::OrderPricing,
+        order_quantity::OrderQuantity,
+        order_request::OrderRequest,
+        order_side::OrderSide,
+        orders::{
+            one_cancels_other::{OneCancelsOtherOrderGeneric, OneCancelsOtherOrderRaw},
+            one_triggers_oco::OneTriggersOcoOrderGeneric,
+            one_triggers_other::OneTriggersOtherOrderGeneric,
+            single::{SingleOrderGeneric, SingleOrderRaw},
+        },
     },
-    values::value::{NumberValue, TokenValue},
+    values::value::{AssetIdValue, NumberValue},
 };
 
 pub struct OrderFactory;
 
 impl OrderFactory {
-    pub fn market(
+    pub fn single(
         &self,
-        base: TokenValue,
-        quote: TokenValue,
+        base: AssetIdValue,
+        quote: AssetIdValue,
         intent: OrderIntent,
         side: OrderSide,
+        timing: OrderActivation<NumberValue>,
+        pricing: OrderPricing<NumberValue>,
         quantity: OrderQuantity<NumberValue>,
-    ) -> OrderRequest<TokenValue, NumberValue> {
-        OrderRequest::Single(SingleOrder {
+        constraints: Vec<OrderConstraint>,
+    ) -> OrderRequest<AssetIdValue, NumberValue> {
+        OrderRequest::Single(SingleOrderGeneric {
             base,
             quote,
-            timing: OrderTiming::Immediate,
-            pricing: OrderPricing::Market,
             intent,
             side,
+            activation: timing,
+            pricing,
             quantity,
+            constraints,
         })
     }
-    pub fn limit(
+    pub fn one_cancels_other(
         &self,
-        base: TokenValue,
-        quote: TokenValue,
-        intent: OrderIntent,
-        side: OrderSide,
-        time_in_force: OrderTimeInForce,
-        price: NumberValue,
-        quantity: OrderQuantity<NumberValue>,
-    ) -> OrderRequest<TokenValue, NumberValue> {
-        OrderRequest::Single(SingleOrder {
-            base,
-            quote,
-            timing: OrderTiming::Immediate,
-            pricing: OrderPricing::Limit {
-                price,
-                time_in_force,
-            },
-            intent,
-            side,
-            quantity,
-        })
+        a: SingleOrderRaw,
+        b: SingleOrderRaw,
+    ) -> OrderRequest<AssetIdValue, NumberValue> {
+        OrderRequest::OneCancelsOther(OneCancelsOtherOrderGeneric { primary: a, secondary: b })
     }
-    pub fn stop_market(
+    pub fn one_triggers_other(
         &self,
-        base: TokenValue,
-        quote: TokenValue,
-        intent: OrderIntent,
-        side: OrderSide,
-        stop_price: NumberValue,
-        quantity: OrderQuantity<NumberValue>,
-    ) -> OrderRequest<TokenValue, NumberValue> {
-        OrderRequest::Single(SingleOrder {
-            base,
-            quote,
-            timing: OrderTiming::Conditional {
-                stop_price,
-                trigger: OrderTriggerDirection::Below,
-            },
-            pricing: OrderPricing::Market,
-            intent,
-            side,
-            quantity,
-        })
+        primary: SingleOrderRaw,
+        secondary: SingleOrderRaw,
+    ) -> OrderRequest<AssetIdValue, NumberValue> {
+        OrderRequest::OneTriggersOther(OneTriggersOtherOrderGeneric { primary, secondary })
     }
-    pub fn stop_limit(
+    pub fn one_triggers_oco(
         &self,
-        base: TokenValue,
-        quote: TokenValue,
-        intent: OrderIntent,
-        side: OrderSide,
-        time_in_force: OrderTimeInForce,
-        stop_price: NumberValue,
-        limit_price: NumberValue,
-        quantity: OrderQuantity<NumberValue>,
-    ) -> OrderRequest<TokenValue, NumberValue> {
-        OrderRequest::Single(SingleOrder {
-            base,
-            quote,
-            timing: OrderTiming::Conditional {
-                stop_price,
-                trigger: OrderTriggerDirection::Below,
-            },
-            pricing: OrderPricing::Limit {
-                price: limit_price,
-                time_in_force,
-            },
-            intent,
-            side,
-            quantity,
-        })
+        primary: SingleOrderRaw,
+        oco_order: OneCancelsOtherOrderRaw,
+    ) -> OrderRequest<AssetIdValue, NumberValue> {
+        OrderRequest::OneTriggersOco(OneTriggersOcoOrderGeneric { primary, oco_order })
     }
 }

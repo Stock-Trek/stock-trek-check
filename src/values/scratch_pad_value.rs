@@ -1,10 +1,12 @@
 use crate::{
+    asset_id::AssetId,
     error::result::StockTrekResult,
+    exchange_id::ExchangeId,
     resolved_context::ResolvedContext,
-    scratch::key::{ExchangeName, ScratchKey, TokenName},
+    scratch::key::ScratchKey,
     values::value::{
-        ExchangeValue, ExchangeValueTrait, FlagValue, FlagValueTrait, NumberValue,
-        NumberValueTrait, TokenValue, TokenValueTrait,
+        AssetIdValue, AssetIdValueTrait, ExchangeIdValue, ExchangeIdValueTrait, FlagValue,
+        FlagValueTrait, NumberValue, NumberValueTrait,
     },
 };
 
@@ -22,7 +24,7 @@ macro_rules! scratch_pad_value {
     };
 }
 
-scratch_pad_value! {ExchangeValueTrait, ExchangeName, exchange, ExchangeValue}
-scratch_pad_value! {TokenValueTrait, TokenName, token, TokenValue}
+scratch_pad_value! {ExchangeIdValueTrait, ExchangeId, exchange_id, ExchangeIdValue}
+scratch_pad_value! {AssetIdValueTrait, AssetId, asset_id, AssetIdValue}
 scratch_pad_value! {FlagValueTrait, bool, flag, FlagValue}
 scratch_pad_value! {NumberValueTrait, f64, number, NumberValue}

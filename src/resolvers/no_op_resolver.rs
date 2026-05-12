@@ -1,5 +1,6 @@
 use crate::{
     error::result::StockTrekResult,
+    execute::capability::{Capability, HasRequiredCapabilities},
     resolved_context::ResolvedContext,
     resolvers::resolver::{Resolver, ResolverTrait},
 };
@@ -18,5 +19,11 @@ impl NoOpResolver {
 impl ResolverTrait for NoOpResolver {
     fn resolve(&self, _: &ResolvedContext) -> StockTrekResult<()> {
         Ok(())
+    }
+}
+
+impl HasRequiredCapabilities for NoOpResolver {
+    fn required_capabilities(&self) -> Vec<Capability> {
+        Vec::new()
     }
 }

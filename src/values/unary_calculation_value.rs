@@ -7,8 +7,9 @@ use crate::{
     values::value::{NumberValue, NumberValueTrait},
 };
 use serde::{Deserialize, Serialize};
+use strum::Display;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum UnaryOperator {
     Abs,
     Neg,

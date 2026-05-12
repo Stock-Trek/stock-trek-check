@@ -1,28 +1,30 @@
 use crate::{
+    asset_id::AssetId,
     error::{
         result::{StockTrekError, StockTrekResult},
         value::ValueError,
     },
-    scratch::key::{ExchangeName, TokenName},
+    exchange_id::ExchangeId,
 };
 use serde::{Deserialize, Serialize};
+use strum::Display;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, Serialize, Deserialize)]
 pub enum ScratchValue {
-    Exchange(ExchangeName),
-    Token(TokenName),
+    ExchangeId(ExchangeId),
+    AssetId(AssetId),
     Flag(bool),
     Number(f64),
 }
 
-impl From<TokenName> for ScratchValue {
-    fn from(value: TokenName) -> Self {
-        ScratchValue::Token(value)
+impl From<AssetId> for ScratchValue {
+    fn from(value: AssetId) -> Self {
+        ScratchValue::AssetId(value)
     }
 }
-impl From<ExchangeName> for ScratchValue {
-    fn from(value: ExchangeName) -> Self {
-        ScratchValue::Exchange(value)
+impl From<ExchangeId> for ScratchValue {
+    fn from(value: ExchangeId) -> Self {
+        ScratchValue::ExchangeId(value)
     }
 }
 impl From<bool> for ScratchValue {
@@ -36,25 +38,25 @@ impl From<f64> for ScratchValue {
     }
 }
 
-impl TryFrom<ScratchValue> for ExchangeName {
+impl TryFrom<ScratchValue> for ExchangeId {
     type Error = StockTrekError;
     fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
-            ScratchValue::Exchange(e) => Ok(e),
-            ScratchValue::Token(_) => err("Exchange", "Token"),
-            ScratchValue::Flag(_) => err("Exchange", "Flag"),
-            ScratchValue::Number(_) => err("Exchange", "Number"),
+            ScratchValue::ExchangeId(e) => Ok(e),
+            ScratchValue::AssetId(_) => err("ExchangeId", "AssetId"),
+            ScratchValue::Flag(_) => err("ExchangeId", "Flag"),
+            ScratchValue::Number(_) => err("ExchangeId", "Number"),
         }
     }
 }
-impl TryFrom<ScratchValue> for TokenName {
+impl TryFrom<ScratchValue> for AssetId {
     type Error = StockTrekError;
     fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
-            ScratchValue::Exchange(_) => err("Token", "Exchange"),
-            ScratchValue::Token(a) => Ok(a),
-            ScratchValue::Flag(_) => err("Token", "Flag"),
-            ScratchValue::Number(_) => err("Token", "Number"),
+            ScratchValue::ExchangeId(_) => err("AssetId", "ExchangeId"),
+            ScratchValue::AssetId(a) => Ok(a),
+            ScratchValue::Flag(_) => err("AssetId", "Flag"),
+            ScratchValue::Number(_) => err("AssetId", "Number"),
         }
     }
 }
@@ -62,8 +64,8 @@ impl TryFrom<ScratchValue> for bool {
     type Error = StockTrekError;
     fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
-            ScratchValue::Exchange(_) => err("Flag", "Exchange"),
-            ScratchValue::Token(_) => err("Flag", "Token"),
+            ScratchValue::ExchangeId(_) => err("Flag", "ExchangeId"),
+            ScratchValue::AssetId(_) => err("Flag", "AssetId"),
             ScratchValue::Flag(f) => Ok(f),
             ScratchValue::Number(_) => err("Flag", "Number"),
         }
@@ -73,8 +75,8 @@ impl TryFrom<ScratchValue> for f64 {
     type Error = StockTrekError;
     fn try_from(value: ScratchValue) -> StockTrekResult<Self> {
         match value {
-            ScratchValue::Exchange(_) => err("Number", "Exchange"),
-            ScratchValue::Token(_) => err("Number", "Token"),
+            ScratchValue::ExchangeId(_) => err("Number", "ExchangeId"),
+            ScratchValue::AssetId(_) => err("Number", "AssetId"),
             ScratchValue::Flag(_) => err("Number", "Flag"),
             ScratchValue::Number(n) => Ok(n),
         }

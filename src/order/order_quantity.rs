@@ -3,11 +3,12 @@ use crate::{
     resolvers::resolveable::Resolvable, values::value::NumberValue,
 };
 use serde::{Deserialize, Serialize};
+use strum::Display;
 
-#[derive(Debug, Clone, Hash, Serialize, Deserialize)]
-pub enum OrderQuantity<Q> {
-    OfBase(Q),
-    OfQuote(Q),
+#[derive(Debug, Display, Clone, Hash, Serialize, Deserialize)]
+pub enum OrderQuantity<N> {
+    OfBase(N),
+    OfQuote(N),
 }
 
 impl Resolvable<OrderQuantity<f64>> for OrderQuantity<NumberValue> {

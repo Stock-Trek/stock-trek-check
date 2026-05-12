@@ -1,11 +1,11 @@
 // TODO
 // use chrono::Utc;
-// use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 // use std::hash::{DefaultHasher, Hash, Hasher};
 // use uuid::Uuid;
 
-// #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-// pub struct OrderId(pub String);
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct OrderId(pub String);
 
 // #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 // pub struct ClientOrderId(pub String);

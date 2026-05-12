@@ -21,13 +21,13 @@ pub struct ResolverContext {
 impl ResolverContext {
     pub fn new() -> Self {
         Self {
-            calculations: CalculationValuesFactory {},
-            literals: LiteralValuesFactory {},
-            orders: OrderFactory {},
-            portfolio: PortfolioValuesFactory {},
-            predicates: PredicatesFactory {},
-            resolvers: ResolversFactory {},
-            scratch_pad: ScratchPadValuesFactory {},
+            calculations: CalculationValuesFactory,
+            literals: LiteralValuesFactory,
+            orders: OrderFactory,
+            portfolio: PortfolioValuesFactory,
+            predicates: PredicatesFactory,
+            resolvers: ResolversFactory,
+            scratch_pad: ScratchPadValuesFactory,
         }
     }
 }

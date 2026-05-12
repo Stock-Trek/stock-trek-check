@@ -1,4 +1,4 @@
-use crate::scratch::key::{ExchangeName, TokenName};
+use crate::{asset_id::AssetId, exchange_id::ExchangeId};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -6,22 +6,22 @@ use thiserror::Error;
 #[repr(u8)]
 pub enum PortfolioError {
     #[error("Portfolio has no account in {}", exchange)]
-    NoAccountInExchange { exchange: ExchangeName },
-    #[error("Portfolio does not own any {} in {}", token, exchange)]
-    TokenNotOwned {
-        exchange: ExchangeName,
-        token: TokenName,
+    NoAccountInExchange { exchange: ExchangeId },
+    #[error("Portfolio does not own any {} in {}", asset_id, exchange_id)]
+    AssetNotOwned {
+        exchange_id: ExchangeId,
+        asset_id: AssetId,
     },
     #[error(
         "Portfolio has {} {} in {} and cannot sell {}",
         owned,
-        token,
-        exchange,
+        asset_id,
+        exchange_id,
         quantity
     )]
-    NotEnoughTokens {
-        exchange: ExchangeName,
-        token: TokenName,
+    NotEnoughAssets {
+        exchange_id: ExchangeId,
+        asset_id: AssetId,
         owned: f64,
         quantity: f64,
     },

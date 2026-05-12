@@ -2,10 +2,10 @@ use crate::{
     order::order_request::OrderRequest,
     predicates::predicate::Predicate,
     resolvers::{
-        if_resolver::IfResolver, list_resolver::ListResolver, no_op_resolver::NoOpResolver,
-        place_order_resolver::PlaceOrderResolver, resolver::Resolver,
+        enqueue_order_resolver::EnqueueOrderResolver, if_resolver::IfResolver,
+        list_resolver::ListResolver, no_op_resolver::NoOpResolver, resolver::Resolver,
     },
-    values::value::{ExchangeValue, NumberValue, TokenValue},
+    values::value::{AssetIdValue, ExchangeIdValue, NumberValue},
 };
 
 pub struct ResolversFactory;
@@ -20,15 +20,15 @@ impl ResolversFactory {
     pub fn no_op(&self) -> Resolver {
         NoOpResolver::new()
     }
-    pub fn place_order(
+    pub fn enqueue_order(
         &self,
-        exchange_value: ExchangeValue,
-        order_request: OrderRequest<TokenValue, NumberValue>,
+        exchange_id_value: ExchangeIdValue,
+        order_request: OrderRequest<AssetIdValue, NumberValue>,
     ) -> Resolver {
-        PlaceOrderResolver::new(exchange_value, order_request)
+        EnqueueOrderResolver::new(exchange_id_value, order_request)
     }
     // TODO
-    // pub fn cancel_order(&self, exchange_value: ExchangeValue, order_id: OrderId) -> Resolver {
-    //     CancelOrderResolver::new(exchange_value, order_id)
+    // pub fn cancel_order(&self, exchange_id_value: ExchangeIdValue, order_id: OrderId) -> Resolver {
+    //     CancelOrderResolver::new(exchange_id_value, order_id)
     // }
 }

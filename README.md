@@ -17,7 +17,7 @@ Add to your Cargo.toml:
 
 ```rs
 [dependencies]
-stock-trek = "0.5.4"
+stock-trek = "0.6.0"
 ```
 
 ## Python Bindings (coming soon)
@@ -35,13 +35,8 @@ An example implementing a cost averaging strategy follows:
 use stock_trek::prelude::*;
 use std::cmp::Ordering;
 
-const BTC: &str = "BTC";
-const USDT: &str = "USDT";
-
 pub struct CostAveraging {
-    token_btc: TokenName,
-    token_usdt: TokenName,
-    key_exchange: ScratchKey<ExchangeName>,
+    key_exchange: ScratchKey<ExchangeId>,
     key_market_exists: ScratchKey<bool>,
     key_satoshi_price: ScratchKey<f64>,
     key_satoshi_quantity: ScratchKey<f64>,
@@ -50,8 +45,6 @@ pub struct CostAveraging {
 impl Default for CostAveraging {
     fn default() -> Self {
         Self {
-            token_btc: TokenName(BTC.into()),
-            token_usdt: TokenName(USDT.into()),
             key_exchange: ScratchKey::new_required("EXCHANGE"),
             key_market_exists: ScratchKey::new_optional("MARKET_EXISTS", false),
             key_satoshi_price: ScratchKey::new_required("SATOSHI_PRICE"),
@@ -66,7 +59,7 @@ impl Strategy for CostAveraging {
         let mut scratch_pad = ScratchPad::new();
         let one_millionth = 1.0 / 1_000_000.0;
         scratch_pad.write(&self.key_satoshi_quantity, one_millionth);
-        let iter = c.exchange_markets_for(&self.token_btc, &self.token_usdt);
+        let iter = c.exchange_markets_for(&AssetId::Bitcoin, &AssetId::Bitcoin);
         let min_by_last_ask = iter.min_by(|(_a_exch, a_market), (_b_exch, b_market)| {
             let a_last_ask = a_market.ticks.ticks[0].ask.price;
             let b_last_ask = b_market.ticks.ticks[0].ask.price;
@@ -81,9 +74,9 @@ impl Strategy for CostAveraging {
         Ok(scratch_pad)
     }
     fn resolver(&self, c: &ResolverContext) -> StockTrekResult<Resolver> {
-        let exchange = c.scratch_pad.exchange(&self.key_exchange);
-        let btc = c.literals.token(self.token_btc.clone());
-        let usdt = c.literals.token(self.token_usdt.clone());
+        let exchange = c.scratch_pad.exchange_id(&self.key_exchange);
+        let btc = c.literals.asset_id(AssetId::Bitcoin);
+        let usdt = c.literals.asset_id(AssetId::Tether);
         let satoshi_price = c.scratch_pad.number(&self.key_satoshi_price);
         let quantity = c.scratch_pad.number(&self.key_satoshi_quantity);
         Ok(c.resolvers.if_else(
@@ -91,18 +84,23 @@ impl Strategy for CostAveraging {
             c.resolvers.if_else(
                 c.predicates.compare(
                     c.portfolio
-                        .token_in_exchange(exchange.clone(), usdt.clone()),
+                        .asset_in_exchange(exchange.clone(), usdt.clone()),
                     Ordering::Greater,
                     satoshi_price,
                 ),
-                c.resolvers.place_order(
+                c.resolvers.enqueue_order(
                     exchange.clone(),
-                    c.orders.market(
+                    c.orders.single(
                         btc,
                         usdt.clone(),
                         OrderIntent::Open,
                         OrderSide::Buy,
+                        OrderActivation::Immediate,
+                        OrderPricing::Market,
                         OrderQuantity::OfQuote(quantity),
+                        vec![OrderConstraint::FillPolicy {
+                            allow_partial: true,
+                        }],
                     ),
                 ),
                 c.resolvers.no_op(),

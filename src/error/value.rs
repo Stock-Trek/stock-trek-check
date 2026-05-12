@@ -8,4 +8,6 @@ pub enum ValueError {
     NotFound { name: String, key: String },
     #[error("Value expects type '{}' but found type '{}'", expected, found)]
     IncorrectType { expected: String, found: String },
+    #[error("Values expected to be equal but were '{}' and '{}'", a, b)]
+    ValuesNotEqual { a: String, b: String },
 }

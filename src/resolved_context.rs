@@ -1,13 +1,18 @@
 use crate::{
-    exchanges::{bot_id::BotId, exchange::Exchange},
+    execute::{exchanges::Exchanges, executor::Executor},
+    order::check::order_check::OrderCheck,
     portfolios::portfolio::Portfolio,
-    scratch::{key::ExchangeName, scratch_pad::ScratchPad},
+    scratch::scratch_pad::ScratchPad,
 };
-use std::collections::HashMap;
+use rust_decimal::RoundingStrategy;
 
 pub struct ResolvedContext {
-    pub bot_id: BotId,
-    pub exchanges: HashMap<ExchangeName, Exchange>,
+    pub price_rounding: RoundingStrategy,
+    pub quantity_rounding: RoundingStrategy,
+    pub rate_rounding: RoundingStrategy,
+    pub order_checks: Vec<Box<dyn OrderCheck>>,
+    pub exchanges: Exchanges,
+    pub executor: Executor,
     pub portfolio: Portfolio,
     pub scratch_pad: ScratchPad,
 }

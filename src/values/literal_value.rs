@@ -1,10 +1,11 @@
 use crate::{
+    asset_id::AssetId,
     error::result::StockTrekResult,
+    exchange_id::ExchangeId,
     resolved_context::ResolvedContext,
-    scratch::key::{ExchangeName, TokenName},
     values::value::{
-        ExchangeValue, ExchangeValueTrait, FlagValue, FlagValueTrait, NumberValue,
-        NumberValueTrait, TokenValue, TokenValueTrait,
+        AssetIdValue, AssetIdValueTrait, ExchangeIdValue, ExchangeIdValueTrait, FlagValue,
+        FlagValueTrait, NumberValue, NumberValueTrait,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -32,7 +33,7 @@ macro_rules! literal_value {
     };
 }
 
-literal_value! {LiteralExchangeValue, ExchangeValueTrait, ExchangeName, exchange, ExchangeValue}
-literal_value! {LiteralTokenValue, TokenValueTrait, TokenName, token, TokenValue}
+literal_value! {LiteralExchangeIdValue, ExchangeIdValueTrait, ExchangeId, exchange_id, ExchangeIdValue}
+literal_value! {LiteralAssetIdValue, AssetIdValueTrait, AssetId, asset_id, AssetIdValue}
 literal_value! {LiteralFlagValue, FlagValueTrait, bool, flag, FlagValue}
 literal_value! {LiteralNumberValue, NumberValueTrait, f64, number, NumberValue}

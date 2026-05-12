@@ -4,8 +4,9 @@ use crate::{
     resolved_context::ResolvedContext,
 };
 use serde::{Deserialize, Serialize};
+use strum::Display;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum QuantityOf {
     All,
     Partial,

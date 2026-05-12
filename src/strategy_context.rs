@@ -1,6 +1,7 @@
 use crate::{
+    asset_id::AssetId,
+    exchange_id::ExchangeId,
     market_data::market::Market,
-    scratch::key::{ExchangeName, TokenName},
     statistics::{
         advanced::Advanced, decompose::Decompose, evaluation::Evaluation,
         exponential_smoothing::ExponentialSmoothing, filter::Filter, frequency::Frequency,
@@ -11,12 +12,12 @@ use crate::{
 use std::collections::HashMap;
 
 pub struct StrategyContext {
-    market_data: HashMap<ExchangeName, MarketDataByBaseContext>,
+    market_data: HashMap<ExchangeId, MarketDataByBaseContext>,
     pub stats: Stats,
 }
 
 impl StrategyContext {
-    pub fn new(market_data: HashMap<ExchangeName, MarketDataByBaseContext>) -> Self {
+    pub fn new(market_data: HashMap<ExchangeId, MarketDataByBaseContext>) -> Self {
         Self {
             market_data,
             stats: Stats {
@@ -36,9 +37,9 @@ impl StrategyContext {
     }
     pub fn exchange_markets_for<'context>(
         &'context self,
-        base: &'context TokenName,
-        quote: &'context TokenName,
-    ) -> impl Iterator<Item = (ExchangeName, &'context Market)> + 'context {
+        base: &'context AssetId,
+        quote: &'context AssetId,
+    ) -> impl Iterator<Item = (ExchangeId, &'context Market)> + 'context {
         self.market_data
             .iter()
             .filter_map(move |(exchange, by_base)| {
@@ -51,33 +52,33 @@ impl StrategyContext {
     }
     pub fn market_for(
         &self,
-        exchange: &ExchangeName,
-        base: &TokenName,
-        quote: &TokenName,
+        exchange_id: &ExchangeId,
+        base: &AssetId,
+        quote: &AssetId,
     ) -> Option<&Market> {
         self.market_data
-            .get(exchange)
+            .get(exchange_id)
             .and_then(|m| m.markets_by_base.get(base))
             .and_then(|m| m.markets_by_quote.get(quote))
     }
 }
 
 pub struct MarketDataByBaseContext {
-    markets_by_base: HashMap<TokenName, MarketDataByQuoteContext>,
+    markets_by_base: HashMap<AssetId, MarketDataByQuoteContext>,
 }
 
 impl MarketDataByBaseContext {
-    pub fn new(markets_by_base: HashMap<TokenName, MarketDataByQuoteContext>) -> Self {
+    pub fn new(markets_by_base: HashMap<AssetId, MarketDataByQuoteContext>) -> Self {
         Self { markets_by_base }
     }
 }
 
 pub struct MarketDataByQuoteContext {
-    markets_by_quote: HashMap<TokenName, Market>,
+    markets_by_quote: HashMap<AssetId, Market>,
 }
 
 impl MarketDataByQuoteContext {
-    pub fn new(markets_by_quote: HashMap<TokenName, Market>) -> Self {
+    pub fn new(markets_by_quote: HashMap<AssetId, Market>) -> Self {
         Self { markets_by_quote }
     }
 }

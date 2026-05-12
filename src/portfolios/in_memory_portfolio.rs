@@ -1,16 +1,17 @@
 use crate::{
+    asset_id::AssetId,
+    exchange_id::ExchangeId,
     portfolios::portfolio::{Portfolio, PortfolioTrait},
-    scratch::key::{ExchangeName, TokenName},
 };
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct InMemoryPortfolio {
-    exchange_tokens: HashMap<ExchangeName, Tokens>,
+    exchange_assets: HashMap<ExchangeId, Assets>,
 }
 impl InMemoryPortfolio {
-    pub fn new(exchange_tokens: HashMap<ExchangeName, Tokens>) -> Self {
-        Self { exchange_tokens }
+    pub fn new(exchange_assets: HashMap<ExchangeId, Assets>) -> Self {
+        Self { exchange_assets }
     }
     pub fn builder() -> Builder {
         Builder::new()
@@ -24,47 +25,47 @@ impl From<InMemoryPortfolio> for Portfolio {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct Tokens {
-    tokens: HashMap<TokenName, f64>,
+pub struct Assets {
+    asset_counts: HashMap<AssetId, f64>,
 }
-impl Tokens {
-    pub fn new(tokens: HashMap<TokenName, f64>) -> Self {
-        Self { tokens }
+impl Assets {
+    pub fn new(asset_counts: HashMap<AssetId, f64>) -> Self {
+        Self { asset_counts }
     }
 }
 
 impl PortfolioTrait for InMemoryPortfolio {
-    fn has_account_in_exchange(&self, exchange: &ExchangeName) -> bool {
-        self.exchange_tokens.contains_key(exchange)
+    fn has_account_in_exchange(&self, exchange_id: &ExchangeId) -> bool {
+        self.exchange_assets.contains_key(exchange_id)
     }
-    fn owns_token(&self, token: &TokenName) -> bool {
-        self.exchange_tokens
+    fn owns_asset(&self, asset_id: &AssetId) -> bool {
+        self.exchange_assets
             .values()
-            .any(|tokens| tokens.tokens.contains_key(token))
+            .any(|assets| assets.asset_counts.contains_key(asset_id))
     }
-    fn owns_token_in_exchange(&self, token: &TokenName, exchange: &ExchangeName) -> bool {
-        self.exchange_tokens
-            .get(exchange)
-            .map(|tokens| tokens.tokens.contains_key(token))
+    fn owns_asset_in_exchange(&self, asset_id: &AssetId, exchange_id: &ExchangeId) -> bool {
+        self.exchange_assets
+            .get(exchange_id)
+            .map(|assets| assets.asset_counts.contains_key(asset_id))
             .unwrap_or(false)
     }
-    fn token_total(&self, token: &TokenName) -> f64 {
-        self.exchange_tokens
+    fn asset_total(&self, asset_id: &AssetId) -> f64 {
+        self.exchange_assets
             .values()
-            .map(|tokens| tokens.tokens.get(token).unwrap_or(&0.0))
+            .map(|assets| assets.asset_counts.get(asset_id).unwrap_or(&0.0))
             .sum()
     }
-    fn token_in_exchange(&self, token: &TokenName, exchange: &ExchangeName) -> f64 {
-        self.exchange_tokens
-            .get(exchange)
-            .and_then(|tokens| tokens.tokens.get(token))
+    fn asset_in_exchange(&self, asset_id: &AssetId, exchange_id: &ExchangeId) -> f64 {
+        self.exchange_assets
+            .get(exchange_id)
+            .and_then(|assets| assets.asset_counts.get(asset_id))
             .copied()
             .unwrap_or(0.0)
     }
     // TODO
     // fn order_by_order_id(
     //     &self,
-    //     exchange: &ExchangeName,
+    //     exchange: &ExchangeId,
     //     order_id: &OrderId,
     // ) -> Option<OrderResponse> {
     //     self.exchange_orders
@@ -74,7 +75,7 @@ impl PortfolioTrait for InMemoryPortfolio {
     // }
     // fn order_by_client_order_id(
     //     &self,
-    //     exchange: &ExchangeName,
+    //     exchange: &ExchangeId,
     //     client_order_id: &ClientOrderId,
     // ) -> Option<OrderResponse> {
     //     self.exchange_orders
@@ -86,26 +87,31 @@ impl PortfolioTrait for InMemoryPortfolio {
 
 #[derive(Clone, Default)]
 pub struct Builder {
-    exchange_tokens: HashMap<ExchangeName, Tokens>,
+    exchange_assets: HashMap<ExchangeId, Assets>,
 }
 
 impl Builder {
     pub fn new() -> Self {
         Self {
-            exchange_tokens: HashMap::new(),
+            exchange_assets: HashMap::new(),
         }
     }
-    pub fn tokens(&mut self, exchange: ExchangeName, token: TokenName, quantity: f64) -> &mut Self {
-        self.exchange_tokens
-            .entry(exchange)
-            .or_insert_with(|| Tokens::new(HashMap::new()))
-            .tokens
-            .entry(token)
+    pub fn assets(
+        &mut self,
+        exchange_id: ExchangeId,
+        asset_id: AssetId,
+        quantity: f64,
+    ) -> &mut Self {
+        self.exchange_assets
+            .entry(exchange_id)
+            .or_insert_with(|| Assets::new(HashMap::new()))
+            .asset_counts
+            .entry(asset_id)
             .and_modify(|prev| *prev += quantity)
             .or_insert(quantity);
         self
     }
     pub fn build(&self) -> InMemoryPortfolio {
-        InMemoryPortfolio::new(self.exchange_tokens.clone())
+        InMemoryPortfolio::new(self.exchange_assets.clone())
     }
 }
