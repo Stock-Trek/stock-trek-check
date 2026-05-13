@@ -9,8 +9,10 @@ use async_trait::async_trait;
 use rust_decimal::Decimal;
 use std::collections::HashMap;
 
+pub type ExchangeAdapter = Box<dyn ExchangeAdapterTrait>;
+
 #[async_trait]
-pub trait ExchangeAdapter {
+pub trait ExchangeAdapterTrait {
     fn id(&self) -> ExchangeId;
     fn capabilities(&self) -> &Vec<Capability>;
     fn increments(&self) -> &HashMap<TradingPair, IncrementSizes>;

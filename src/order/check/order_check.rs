@@ -3,6 +3,8 @@ use crate::{
 };
 use rust_decimal::Decimal;
 
-pub trait OrderCheck {
+pub type OrderCheck = Box<dyn OrderCheckTrait>;
+
+pub trait OrderCheckTrait {
     fn check(&self, order_request: &mut OrderRequest<AssetId, Decimal>) -> StockTrekResult<()>;
 }

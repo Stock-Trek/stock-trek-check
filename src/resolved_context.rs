@@ -10,7 +10,7 @@ pub struct ResolvedContext {
     pub price_rounding: RoundingStrategy,
     pub quantity_rounding: RoundingStrategy,
     pub rate_rounding: RoundingStrategy,
-    pub order_checks: Vec<Box<dyn OrderCheck>>,
+    pub order_checks: Vec<OrderCheck>,
     pub exchanges: Exchanges,
     pub executor: Executor,
     pub portfolio: Portfolio,

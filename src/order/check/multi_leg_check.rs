@@ -5,7 +5,7 @@ use crate::{
         value::ValueError,
     },
     order::{
-        check::order_check::OrderCheck, order_request::OrderRequest,
+        check::order_check::OrderCheckTrait, order_request::OrderRequest,
         orders::single::SingleOrderGeneric,
     },
 };
@@ -23,7 +23,7 @@ pub enum OnDifferent {
     PreferPrimary,
 }
 
-impl OrderCheck for MultiLegCheck {
+impl OrderCheckTrait for MultiLegCheck {
     fn check(&self, order_request: &mut OrderRequest<AssetId, Decimal>) -> StockTrekResult<()> {
         match order_request {
             OrderRequest::Single(_) => Ok(()),
