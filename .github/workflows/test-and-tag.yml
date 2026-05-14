@@ -26,15 +26,18 @@ jobs:
           cargo clippy
           cargo test
 
-      - name: Create tag
+      - name: Get version, check if tag exists, create if not
         env:
-          GH_TOKEN: ${{ secrets.PUSH_TAG_PAT }}
+          GITHUB_TOKEN: ${{ secrets.PUSH_TAG_PAT }}
         run: |
-          VERSION=$(cargo pkgid | rev | cut -d '@' -f 1 | cut -d '#' -f 1 | rev)
+          VERSION=$(cargo pkgid | | rev | cut -d '@' -f 1 | cut -d '#' -f 1 | rev)
           TAG="v${VERSION}"
-          if gh release view "${TAG}" &>/dev/null; then
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q "refs/tags/${TAG}"; then
             echo "Tag ${TAG} already exists"
           else
             echo "Creating tag ${TAG}"
-            gh release create "${TAG}" --generate-notes --target "${GITHUB_SHA}"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag "${TAG}"
+            git push origin "${TAG}"
           fi
