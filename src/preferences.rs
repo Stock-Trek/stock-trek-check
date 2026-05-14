@@ -9,7 +9,7 @@ pub struct MultiLeg {
 
 #[derive(Debug, Clone, Copy)]
 pub enum OnDifferent {
-    PreferPrimary,
-    SkipOrder,
-    CancelAll,
+    UseDataFromPrimary,
+    SkipThisOrder,
+    CancelEntireIteration,
 }
