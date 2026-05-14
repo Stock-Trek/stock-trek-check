@@ -1,7 +1,7 @@
 use crate::{
     asset_id::AssetId,
-    error::result::StockTrekResult,
     capability::{combine_capabilities, Capability, HasRequiredCapabilities},
+    error::result::StockTrekResult,
     order::order_request::OrderRequest,
     predicates::predicate::Predicate,
     resolved_context::ResolvedContext,

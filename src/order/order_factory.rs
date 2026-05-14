@@ -44,10 +44,10 @@ impl OrderFactory {
     }
     pub fn one_cancels_other(
         &self,
-        a: SingleOrderRaw,
-        b: SingleOrderRaw,
+        primary: SingleOrderRaw,
+        secondary: SingleOrderRaw,
     ) -> OrderRequest<AssetIdValue, NumberValue> {
-        OrderRequest::OneCancelsOther(OneCancelsOtherOrderGeneric { primary: a, secondary: b })
+        OrderRequest::OneCancelsOther(OneCancelsOtherOrderGeneric { primary, secondary })
     }
     pub fn one_triggers_other(
         &self,

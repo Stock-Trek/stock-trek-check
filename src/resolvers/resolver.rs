@@ -1,7 +1,6 @@
 use crate::{
-    asset_id::AssetId, error::result::StockTrekResult,
-    capability::HasRequiredCapabilities, order::order_request::OrderRequest,
-    resolved_context::ResolvedContext,
+    asset_id::AssetId, capability::HasRequiredCapabilities, error::result::StockTrekResult,
+    order::order_request::OrderRequest, resolved_context::ResolvedContext,
 };
 
 pub type Resolver = Box<dyn ResolverTrait>;
