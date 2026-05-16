@@ -1,32 +1,65 @@
 # stock-trek
 
-A lightweight, composable time series and statistical toolkit designed for running crypto bots on [stock-trek.com](https://stock-trek.com). Rust-native core with optional Python bindings
+A lightweight, composable time series and statistical toolkit designed for running crypto bots on [stock-trek.com](https://stock-trek.com). Rust-native core.
 
 ## Overview
 
-stock-trek provides core abstractions and utilities for working with market data, including:
+stock-trek provides core abstractions and utilities for working with market data, building trading strategies, and performing statistical analysis. Key capabilities include:
 
-- Order books
-- Aligned/Rolling windows
-- Ticks
-- Statistical and analytical functions
+**Market Data**
+- Order books (bids/asks per exchange)
+- Ticks (last-traded price/quantity with bid/ask)
+- Quotes (price-quantity pairs)
+- OHLCV candles (open, high, low, close, volume)
+- Aligned and rolling time windows
+- Timestamps (millisecond precision)
+
+**Statistics & Analysis**
+- **Descriptive statistics**: mean, variance, standard deviation, covariance, correlation, skewness, kurtosis
+- **Time series analysis**: autocorrelation, autocovariance, cross-correlation, partial autocorrelation
+- **Moving averages**: simple (SMA), exponential (EMA), weighted (WMA)
+- **Exponential smoothing**: simple, Holt linear trend, Holt-Winters (additive/multiplicative)
+- **Decomposition**: classical seasonal decompose, STL (LOESS-based), LOESS smoothing
+- **Filters**: Hodrick-Prescott, Wiener filter
+- **Frequency domain**: discrete Fourier transform (DFT), inverse DFT, periodogram, spectral density
+- **Wavelets**: continuous wavelet transform (Morlet, Mexican hat), discrete wavelet transform (Haar)
+- **Hypothesis testing**: augmented Dickey-Fuller, Jarque-Bera, KPSS, Durbin-Watson, Ljung-Box
+- **Model evaluation**: AIC, BIC, log-likelihood, MAE, MAPE, MSE, RMSE
+- **Transformations**: Box-Cox, detrend (linear), difference, lag, logarithm, rolling mean, rolling standard deviation, seasonal difference
+- **Advanced statistics**: Hurst exponent, mutual information, sample entropy, Shannon entropy
+
+**Backtesting & Strategy Framework**
+- `Strategy` trait with `#[register_strategy(default)]` annotation
+- `ScratchKey` / `ScratchPad` system for inter-call state
+- `ResolverContext` / `ResolvedContext` for order resolution
+- Rich predicate system: compare, scratch pad, owns asset, has account, quantity of, and not
+- Full order model: single, OCO, OTO, OTOCO orders with limit/market pricing, immediate/triggered activation, fill policies, and time-in-force constraints
+- Exchanges, portfolios, and asset value tracking
+
+**Code Verification**
+- Syntax verifier for strategy code (disallows unsupported constructs)
+- CLI tool (`stock-trek verify --file <path>`)
 
 ## Installation
 
-Add to your Cargo.toml:
+Add to your `Cargo.toml`:
 
-```rs
+```toml
 [dependencies]
 stock-trek = "0.6.7"
 ```
 
-## Python Bindings (coming soon)
+## Python Bindings
 
-stock-trek will also provide Python bindings in the future, available for installation via
+Python bindings are available for installation via pip:
 
-`pip install stock-trek`
+```sh
+pip install stock-trek
+```
 
 ## Usage
+
+### Implementing a Strategy
 
 Implement the `Strategy` and `Default` traits for your algorithm and register it with the annotation `#[register_strategy(default)]`.
 An example implementing a cost averaging strategy follows:
@@ -119,6 +152,25 @@ impl Strategy for CostAveraging {
 }
 ```
 
+### Statistics
+
+```rs
+use stock_trek::statistics::{Stats, moving_average::MovingAverage};
+
+let values = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+let stats = Stats::default();
+
+let mean = stats.mean(&values)?;                   // 3.0
+let variance = stats.variance(&values, 0)?;         // 2.0
+let std_dev = stats.standard_deviation(&values, 0)?; // ~1.414
+
+let ma = MovingAverage;
+let sma = ma.simple_moving_average(&values, 3);     // [2.0, 3.0, 4.0]
+let ema = ma.exponential_moving_average(&values, 0.5); // [1.0, 1.5, 2.25, ...]
+```
+
+### Code Verification
+
 Stock-Trek verifies code before running it and disallows certain syntax elements. To verify code locally, install it with
 
 ```sh
@@ -131,12 +183,51 @@ then run the verify command with
 stock-trek verify --file ./path/strategy.rs
 ```
 
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `market_data` | Market data types: ticks, quotes, OHLCV, order books, aligned/rolling windows, timestamps |
+| `statistics` | Statistical and time series analysis (see breakdown below) |
+| `strategy` | `Strategy` trait and `#[register_strategy]` annotation |
+| `strategy_context` | Context provided to strategies at calculation time |
+| `resolver_context` / `resolved_context` | Contexts for order resolution |
+| `resolvers` | Order resolution primitives: if-else, enqueue order, no-op, list |
+| `predicates` | Conditional predicates: compare, scratch pad, owns asset, has account, etc. |
+| `order` | Full order model: single, OCO, OTO, OTOCO, pricing, activation, constraints |
+| `portfolios` | Portfolio tracking (in-memory, stub) |
+| `scratch` | Scratch key/value system for inter-call state |
+| `values` | Value system: literals, scratch pad values, calculations, asset values |
+| `exchange_id` | Exchange identifier type |
+| `asset_id` | Asset identifier type (Bitcoin, Tether, etc.) |
+| `preferences` | Strategy preferences (multi-leg behavior) |
+| `capability` | Exchange capability definitions |
+| `verification` | Syntax verification and policy enforcement |
+| `examples` | Example strategies (cost averaging) |
+
+### Statistics Module Breakdown
+
+| Sub-module | Features |
+|------------|----------|
+| `stats` | Mean, variance, standard deviation, covariance, correlation, skewness, kurtosis |
+| `moving_average` | SMA, EMA, weighted moving average |
+| `time_series` | Autocorrelation, autocovariance, cross-correlation, partial autocorrelation |
+| `exponential_smoothing` | Simple exponential smoothing, Holt linear trend, Holt-Winters |
+| `decompose` | LOESS smoothing, seasonal decompose, STL decomposition |
+| `filter` | Hodrick-Prescott filter, Wiener filter |
+| `frequency` | DFT, inverse DFT, periodogram, spectral density |
+| `wavelet` | Continuous wavelet transform (Morlet, Mexican hat), discrete wavelet transform (Haar) |
+| `hypothesis` | ADF test, Jarque-Bera test, KPSS test, Durbin-Watson, Ljung-Box |
+| `evaluation` | AIC, BIC, log-likelihood, MAE, MAPE, MSE, RMSE |
+| `transformation` | Box-Cox, detrend, difference, lag, logarithm, rolling mean/std, seasonal difference |
+| `advanced` | Hurst exponent, mutual information, sample entropy, Shannon entropy |
+
 ## Roadmap
 
 Planned features include:
 
 - Technical indicators (EMA, RSI, MACD, etc.)
-- Backtesting and simulation utilities
+- Enhanced backtesting and simulation utilities
 
 ## Status
 
