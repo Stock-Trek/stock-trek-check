@@ -3,8 +3,8 @@ use crate::{
     capability::{Capability, HasRequiredCapabilities, MultiLegCapability},
     error::result::StockTrekResult,
     order::orders::{one_cancels_other::OneCancelsOtherOrderGeneric, single::SingleOrderGeneric},
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
-    resolvers::resolveable::Resolvable,
     values::value::{AssetIdValue, NumberValue},
 };
 use serde::{Deserialize, Serialize};

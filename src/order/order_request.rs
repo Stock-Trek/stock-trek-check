@@ -7,8 +7,8 @@ use crate::{
         one_triggers_oco::OneTriggersOcoOrderGeneric,
         one_triggers_other::OneTriggersOtherOrderGeneric, single::SingleOrderGeneric,
     },
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
-    resolvers::resolveable::Resolvable,
     values::value::{AssetIdValue, NumberValue},
 };
 use serde::{Deserialize, Serialize};

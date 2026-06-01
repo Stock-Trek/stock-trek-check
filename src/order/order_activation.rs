@@ -4,8 +4,8 @@ use crate::{
         order_price_basis::OrderPriceBasis, order_trigger_direction::OrderTriggerDirection,
         order_trigger_mode::OrderTriggerMode,
     },
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
-    resolvers::resolveable::Resolvable,
     values::value::NumberValue,
 };
 use serde::{Deserialize, Serialize};

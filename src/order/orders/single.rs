@@ -7,8 +7,8 @@ use crate::{
         order_intent::OrderIntent, order_pricing::OrderPricing, order_quantity::OrderQuantity,
         order_side::OrderSide,
     },
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
-    resolvers::resolveable::Resolvable,
     values::value::{AssetIdValue, NumberValue},
 };
 use serde::{Deserialize, Serialize};
