@@ -10,6 +10,7 @@ pub mod market_data;
 pub mod order;
 pub mod portfolios;
 pub mod preferences;
+pub mod resolveable;
 pub mod resolved_context;
 pub mod signal;
 pub mod signal_context;

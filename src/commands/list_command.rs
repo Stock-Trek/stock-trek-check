@@ -8,20 +8,20 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct ListCommand {
-    resolvers: Vec<Command>,
+    commands: Vec<Command>,
 }
 
 impl ListCommand {
-    pub fn new(resolvers: Vec<Command>) -> Command {
-        Box::new(Self { resolvers })
+    pub fn new(commands: Vec<Command>) -> Command {
+        Box::new(Self { commands })
     }
 }
 
 #[typetag::serde]
 impl CommandTrait for ListCommand {
-    fn resolve(&self, c: &ResolvedContext) -> StockTrekResult<()> {
-        for resolver in &self.resolvers {
-            resolver.resolve(c)?;
+    fn execute(&self, c: &ResolvedContext) -> StockTrekResult<()> {
+        for command in &self.commands {
+            command.execute(c)?;
         }
         Ok(())
     }
@@ -30,8 +30,8 @@ impl CommandTrait for ListCommand {
 impl HasRequiredCapabilities for ListCommand {
     fn required_capabilities(&self) -> Vec<Capability> {
         let mut capabilities = Vec::new();
-        for resolver in &self.resolvers {
-            capabilities.extend(resolver.required_capabilities());
+        for command in &self.commands {
+            capabilities.extend(command.required_capabilities());
         }
         capabilities
     }

@@ -1,13 +1,13 @@
 use crate::{
     asset_id::AssetId,
     capability::{Capability, HasRequiredCapabilities, QuoteQuantityCapability},
-    commands::resolveable::Resolvable,
     error::result::StockTrekResult,
     order::{
         order_activation::OrderActivation, order_constraint::OrderConstraint,
         order_intent::OrderIntent, order_pricing::OrderPricing, order_quantity::OrderQuantity,
         order_side::OrderSide,
     },
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
     values::value::{AssetIdValue, NumberValue},
 };

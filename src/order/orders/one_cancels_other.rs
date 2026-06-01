@@ -1,9 +1,9 @@
 use crate::{
     asset_id::AssetId,
     capability::{combine_capabilities, Capability, HasRequiredCapabilities, MultiLegCapability},
-    commands::resolveable::Resolvable,
     error::result::StockTrekResult,
     order::orders::single::SingleOrderGeneric,
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
     values::value::{AssetIdValue, NumberValue},
 };

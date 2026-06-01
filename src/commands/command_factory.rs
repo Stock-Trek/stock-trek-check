@@ -14,8 +14,8 @@ impl CommandFactory {
     pub fn if_else(&self, condition: Condition, if_true: Command, if_false: Command) -> Command {
         IfCommand::new(condition, if_true, if_false)
     }
-    pub fn list(&self, resolvers: Vec<Command>) -> Command {
-        ListCommand::new(resolvers)
+    pub fn list(&self, commands: Vec<Command>) -> Command {
+        ListCommand::new(commands)
     }
     pub fn no_op(&self) -> Command {
         NoOpCommand::new()
@@ -28,7 +28,7 @@ impl CommandFactory {
         EnqueueOrderCommand::new(exchange_id_value, order_request)
     }
     // TODO
-    // pub fn cancel_order(&self, exchange_id_value: ExchangeIdValue, order_id: OrderId) -> Resolver {
-    //     CancelOrderResolver::new(exchange_id_value, order_id)
+    // pub fn cancel_order(&self, exchange_id_value: ExchangeIdValue, order_id: OrderId) -> Command {
+    //     CancelOrderCommand::new(exchange_id_value, order_id)
     // }
 }

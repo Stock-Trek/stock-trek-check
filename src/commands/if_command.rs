@@ -26,12 +26,12 @@ impl IfCommand {
 
 #[typetag::serde]
 impl CommandTrait for IfCommand {
-    fn resolve(&self, c: &ResolvedContext) -> StockTrekResult<()> {
+    fn execute(&self, c: &ResolvedContext) -> StockTrekResult<()> {
         let condition = self.condition.test(c)?;
         if condition {
-            self.if_true.resolve(c)?;
+            self.if_true.execute(c)?;
         } else {
-            self.if_false.resolve(c)?;
+            self.if_false.execute(c)?;
         }
         Ok(())
     }

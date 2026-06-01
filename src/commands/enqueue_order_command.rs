@@ -1,11 +1,9 @@
 use crate::{
     capability::{Capability, HasRequiredCapabilities},
-    commands::{
-        command::{Command, CommandTrait},
-        resolveable::Resolvable,
-    },
+    commands::command::{Command, CommandTrait},
     error::result::StockTrekResult,
     order::order_request::OrderRequest,
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
     values::value::{AssetIdValue, ExchangeIdValue, NumberValue},
 };
@@ -31,7 +29,7 @@ impl EnqueueOrderCommand {
 
 #[typetag::serde]
 impl CommandTrait for EnqueueOrderCommand {
-    fn resolve(&self, c: &ResolvedContext) -> StockTrekResult<()> {
+    fn execute(&self, c: &ResolvedContext) -> StockTrekResult<()> {
         let exchange_id = self.exchange_id_value.exchange_id(c)?;
         let resolved_order_request = self.order_request.try_resolve(c)?;
         (c.enqueue_order)(exchange_id, resolved_order_request)

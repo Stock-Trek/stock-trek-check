@@ -7,5 +7,5 @@ pub type Command = Box<dyn CommandTrait>;
 
 #[typetag::serde]
 pub trait CommandTrait: HasRequiredCapabilities + Send + Sync {
-    fn resolve(&self, c: &ResolvedContext) -> StockTrekResult<()>;
+    fn execute(&self, c: &ResolvedContext) -> StockTrekResult<()>;
 }

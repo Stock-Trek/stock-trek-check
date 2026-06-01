@@ -9,11 +9,11 @@ use crate::{
 
 pub struct StrategyContext {
     pub calculations: CalculationValuesFactory,
+    pub commands: CommandFactory,
+    pub conditions: ConditionFactory,
     pub literals: LiteralValuesFactory,
     pub orders: OrderFactory,
     pub portfolio: PortfolioValuesFactory,
-    pub conditions: ConditionFactory,
-    pub commands: CommandFactory,
     pub signals: SignalValuesFactory,
 }
 
@@ -21,11 +21,11 @@ impl StrategyContext {
     pub fn new() -> Self {
         Self {
             calculations: CalculationValuesFactory,
+            commands: CommandFactory,
+            conditions: ConditionFactory,
             literals: LiteralValuesFactory,
             orders: OrderFactory,
             portfolio: PortfolioValuesFactory,
-            conditions: ConditionFactory,
-            commands: CommandFactory,
             signals: SignalValuesFactory,
         }
     }

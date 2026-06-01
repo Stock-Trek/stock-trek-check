@@ -17,7 +17,7 @@ impl NoOpCommand {
 
 #[typetag::serde]
 impl CommandTrait for NoOpCommand {
-    fn resolve(&self, _: &ResolvedContext) -> StockTrekResult<()> {
+    fn execute(&self, _: &ResolvedContext) -> StockTrekResult<()> {
         Ok(())
     }
 }

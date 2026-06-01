@@ -1,10 +1,10 @@
 use crate::{
-    commands::resolveable::Resolvable,
     error::result::StockTrekResult,
     order::{
         order_price_basis::OrderPriceBasis, order_trigger_direction::OrderTriggerDirection,
         order_trigger_mode::OrderTriggerMode,
     },
+    resolveable::Resolvable,
     resolved_context::ResolvedContext,
     values::value::NumberValue,
 };

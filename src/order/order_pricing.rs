@@ -1,7 +1,6 @@
 use crate::{
-    commands::resolveable::Resolvable, error::result::StockTrekResult,
-    order::order_time_in_force::OrderTimeInForce, resolved_context::ResolvedContext,
-    values::value::NumberValue,
+    error::result::StockTrekResult, order::order_time_in_force::OrderTimeInForce,
+    resolveable::Resolvable, resolved_context::ResolvedContext, values::value::NumberValue,
 };
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
