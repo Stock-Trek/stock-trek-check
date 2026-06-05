@@ -62,40 +62,50 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Abs => value.abs(),
             UnaryOperator::Acos => {
                 if value < -1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Acos: A value <-1 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::DomainError {
+                        operator: "Acos",
+                        value,
+                        domain_min: -1.0,
+                        domain_max: 1.0,
+                    }));
                 }
                 if value > 1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Acos: A value >1 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::DomainError {
+                        operator: "Acos",
+                        value,
+                        domain_min: -1.0,
+                        domain_max: 1.0,
+                    }));
                 }
                 value.acos()
             }
             UnaryOperator::Acosh => {
                 if value < 1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Acos: A value <1 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::DomainError {
+                        operator: "Acosh",
+                        value,
+                        domain_min: 1.0,
+                        domain_max: f64::INFINITY,
+                    }));
                 }
                 value.acosh()
             }
             UnaryOperator::Asin => {
                 if value < -1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Asin: A value <-1 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::DomainError {
+                        operator: "Asin",
+                        value,
+                        domain_min: -1.0,
+                        domain_max: 1.0,
+                    }));
                 }
                 if value > 1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Asin: A value >1 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::DomainError {
+                        operator: "Asin",
+                        value,
+                        domain_min: -1.0,
+                        domain_max: 1.0,
+                    }));
                 }
                 value.asin()
             }
@@ -103,28 +113,32 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Atan => value.atan(),
             UnaryOperator::Atanh => {
                 if value == -1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Atanh: A value =-1 is not supported, it would give negative infinity"
-                            .to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::EdgeCase {
+                        operator: "Atanh",
+                        detail: "value = -1 would produce negative infinity".to_string(),
+                    }));
                 }
                 if value == 1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Atanh: A value =1 is not supported, it would give positive infinity"
-                            .to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::EdgeCase {
+                        operator: "Atanh",
+                        detail: "value = 1 would produce positive infinity".to_string(),
+                    }));
                 }
                 if value < -1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Atanh: A value <-1 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::DomainError {
+                        operator: "Atanh",
+                        value,
+                        domain_min: -1.0,
+                        domain_max: 1.0,
+                    }));
                 }
                 if value > 1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Atanh: A value >1 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::DomainError {
+                        operator: "Atanh",
+                        value,
+                        domain_min: -1.0,
+                        domain_max: 1.0,
+                    }));
                 }
                 value.atanh()
             }
@@ -137,43 +151,46 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Frac => value.fract(),
             UnaryOperator::Log10 => {
                 if value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Log10: A value =0 is not supported, it would give undefined".to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                        operator: "Log10",
+                        detail: "value = 0 would produce undefined".to_string(),
+                    }));
                 }
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Log10: A value <0 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                        operator: "Log10",
+                        detail: format!("value {} < 0 would produce a complex number", value),
+                    }));
                 }
                 value.log10()
             }
             UnaryOperator::Log2 => {
                 if value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Log2: A value =0 is not supported, it would give undefined".to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                        operator: "Log2",
+                        detail: "value = 0 would produce undefined".to_string(),
+                    }));
                 }
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Log2: A value <0 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                        operator: "Log2",
+                        detail: format!("value {} < 0 would produce a complex number", value),
+                    }));
                 }
                 value.log2()
             }
             UnaryOperator::LogE => {
                 if value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "LogE: A value =0 is not supported, it would give undefined".to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                        operator: "LogE",
+                        detail: "value = 0 would produce undefined".to_string(),
+                    }));
                 }
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "LogE: A value <0 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                        operator: "LogE",
+                        detail: format!("value {} < 0 would produce a complex number", value),
+                    }));
                 }
                 value.ln()
             }
@@ -184,10 +201,11 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Sinh => value.sinh(),
             UnaryOperator::Sqrt => {
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Sqrt: A value <0 {} is not supported, it would give a complex number",
-                        value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::ComplexResult {
+                        operator: "Sqrt",
+                        value,
+                        relation: "< 0",
+                    }));
                 }
                 value.sqrt()
             }

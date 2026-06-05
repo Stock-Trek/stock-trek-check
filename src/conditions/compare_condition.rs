@@ -38,10 +38,10 @@ impl ConditionTrait for CompareCondition {
             Some(Ordering::Less) => Ok(self.comparison.is_le()),
             Some(Ordering::Equal) => Ok(self.comparison.is_eq()),
             Some(Ordering::Greater) => Ok(self.comparison.is_ge()),
-            None => Err(StockTrekError::General(GeneralError::Message(format!(
-                "Failed to compare {} and {}",
-                left_value, right_value
-            )))),
+            None => Err(StockTrekError::General(GeneralError::IncomparableValues {
+                left: left_value,
+                right: right_value,
+            })),
         }
     }
 }
