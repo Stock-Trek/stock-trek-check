@@ -1,8 +1,8 @@
 use crate::{
     conditions::condition::{Condition, ConditionTrait},
     error::{
-        general::GeneralError,
         result::{StockTrekError, StockTrekResult},
+        stats::StatsError,
     },
     resolved_context::ResolvedContext,
     util::serde_ordering,
@@ -38,7 +38,7 @@ impl ConditionTrait for CompareCondition {
             Some(Ordering::Less) => Ok(self.comparison.is_le()),
             Some(Ordering::Equal) => Ok(self.comparison.is_eq()),
             Some(Ordering::Greater) => Ok(self.comparison.is_ge()),
-            None => Err(StockTrekError::General(GeneralError::IncomparableValues {
+            None => Err(StockTrekError::Stats(StatsError::IncomparableValues {
                 left: left_value,
                 right: right_value,
             })),

@@ -1,7 +1,7 @@
 use crate::{
     error::{
-        general::GeneralError,
         result::{StockTrekError, StockTrekResult},
+        stats::StatsError,
     },
     resolved_context::ResolvedContext,
     values::value::{NumberValue, NumberValueTrait},
@@ -51,15 +51,16 @@ impl NumberValueTrait for BinaryCalculationValue {
             BinaryOperator::Atan2 => left_value.atan2(right_value),
             BinaryOperator::Div => {
                 if right_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::DivisionByZero {
-                        operator: "Div",
+                    return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+                        function: "Div",
+                        detail: "divisor = 0 would produce +/- infinity".to_string(),
                     }));
                 }
                 left_value / right_value
             }
             BinaryOperator::Pow => {
                 if left_value < 0.0 && right_value.fract() != 0.0 {
-                    return Err(StockTrekError::General(GeneralError::ComplexPowerResult {
+                    return Err(StockTrekError::Stats(StatsError::ComplexPowerResult {
                         operator: "Pow",
                         base: left_value,
                         exponent: right_value,
@@ -69,31 +70,31 @@ impl NumberValueTrait for BinaryCalculationValue {
             }
             BinaryOperator::Log => {
                 if left_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::UndefinedLogarithm {
                         operator: "Log",
                         detail: "argument = 0 would produce undefined".to_string(),
                     }));
                 }
                 if right_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::UndefinedLogarithm {
                         operator: "Log",
                         detail: "base = 0 would produce undefined".to_string(),
                     }));
                 }
                 if right_value == 1.0 {
-                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::UndefinedLogarithm {
                         operator: "Log",
                         detail: "base = 1 would produce undefined".to_string(),
                     }));
                 }
                 if left_value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::ComplexLogarithm {
                         operator: "Log",
                         detail: format!("argument {} < 0 would produce a complex number", left_value),
                     }));
                 }
                 if right_value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::ComplexLogarithm {
                         operator: "Log",
                         detail: format!("base {} < 0 would produce a complex number", right_value),
                     }));
@@ -102,8 +103,9 @@ impl NumberValueTrait for BinaryCalculationValue {
             }
             BinaryOperator::Mod => {
                 if right_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::DivisionByZero {
-                        operator: "Mod",
+                    return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+                        function: "Mod",
+                        detail: "divisor = 0 would produce +/- infinity".to_string(),
                     }));
                 }
                 left_value % right_value
