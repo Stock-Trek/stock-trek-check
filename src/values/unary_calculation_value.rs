@@ -1,7 +1,7 @@
 use crate::{
     error::{
-        general::GeneralError,
         result::{StockTrekError, StockTrekResult},
+        stats::StatsError,
     },
     resolved_context::ResolvedContext,
     values::value::{NumberValue, NumberValueTrait},
@@ -62,7 +62,7 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Abs => value.abs(),
             UnaryOperator::Acos => {
                 if value < -1.0 {
-                    return Err(StockTrekError::General(GeneralError::DomainError {
+                    return Err(StockTrekError::Stats(StatsError::CalculationDomainError {
                         operator: "Acos",
                         value,
                         domain_min: -1.0,
@@ -70,7 +70,7 @@ impl NumberValueTrait for UnaryCalculationValue {
                     }));
                 }
                 if value > 1.0 {
-                    return Err(StockTrekError::General(GeneralError::DomainError {
+                    return Err(StockTrekError::Stats(StatsError::CalculationDomainError {
                         operator: "Acos",
                         value,
                         domain_min: -1.0,
@@ -81,7 +81,7 @@ impl NumberValueTrait for UnaryCalculationValue {
             }
             UnaryOperator::Acosh => {
                 if value < 1.0 {
-                    return Err(StockTrekError::General(GeneralError::DomainError {
+                    return Err(StockTrekError::Stats(StatsError::CalculationDomainError {
                         operator: "Acosh",
                         value,
                         domain_min: 1.0,
@@ -92,7 +92,7 @@ impl NumberValueTrait for UnaryCalculationValue {
             }
             UnaryOperator::Asin => {
                 if value < -1.0 {
-                    return Err(StockTrekError::General(GeneralError::DomainError {
+                    return Err(StockTrekError::Stats(StatsError::CalculationDomainError {
                         operator: "Asin",
                         value,
                         domain_min: -1.0,
@@ -100,7 +100,7 @@ impl NumberValueTrait for UnaryCalculationValue {
                     }));
                 }
                 if value > 1.0 {
-                    return Err(StockTrekError::General(GeneralError::DomainError {
+                    return Err(StockTrekError::Stats(StatsError::CalculationDomainError {
                         operator: "Asin",
                         value,
                         domain_min: -1.0,
@@ -113,19 +113,19 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Atan => value.atan(),
             UnaryOperator::Atanh => {
                 if value == -1.0 {
-                    return Err(StockTrekError::General(GeneralError::EdgeCase {
+                    return Err(StockTrekError::Stats(StatsError::EdgeCase {
                         operator: "Atanh",
                         detail: "value = -1 would produce negative infinity".to_string(),
                     }));
                 }
                 if value == 1.0 {
-                    return Err(StockTrekError::General(GeneralError::EdgeCase {
+                    return Err(StockTrekError::Stats(StatsError::EdgeCase {
                         operator: "Atanh",
                         detail: "value = 1 would produce positive infinity".to_string(),
                     }));
                 }
                 if value < -1.0 {
-                    return Err(StockTrekError::General(GeneralError::DomainError {
+                    return Err(StockTrekError::Stats(StatsError::CalculationDomainError {
                         operator: "Atanh",
                         value,
                         domain_min: -1.0,
@@ -133,7 +133,7 @@ impl NumberValueTrait for UnaryCalculationValue {
                     }));
                 }
                 if value > 1.0 {
-                    return Err(StockTrekError::General(GeneralError::DomainError {
+                    return Err(StockTrekError::Stats(StatsError::CalculationDomainError {
                         operator: "Atanh",
                         value,
                         domain_min: -1.0,
@@ -151,13 +151,13 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Frac => value.fract(),
             UnaryOperator::Log10 => {
                 if value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::UndefinedLogarithm {
                         operator: "Log10",
                         detail: "value = 0 would produce undefined".to_string(),
                     }));
                 }
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::ComplexLogarithm {
                         operator: "Log10",
                         detail: format!("value {} < 0 would produce a complex number", value),
                     }));
@@ -166,13 +166,13 @@ impl NumberValueTrait for UnaryCalculationValue {
             }
             UnaryOperator::Log2 => {
                 if value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::UndefinedLogarithm {
                         operator: "Log2",
                         detail: "value = 0 would produce undefined".to_string(),
                     }));
                 }
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::ComplexLogarithm {
                         operator: "Log2",
                         detail: format!("value {} < 0 would produce a complex number", value),
                     }));
@@ -181,13 +181,13 @@ impl NumberValueTrait for UnaryCalculationValue {
             }
             UnaryOperator::LogE => {
                 if value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::UndefinedLogarithm {
                         operator: "LogE",
                         detail: "value = 0 would produce undefined".to_string(),
                     }));
                 }
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                    return Err(StockTrekError::Stats(StatsError::ComplexLogarithm {
                         operator: "LogE",
                         detail: format!("value {} < 0 would produce a complex number", value),
                     }));
@@ -201,7 +201,7 @@ impl NumberValueTrait for UnaryCalculationValue {
             UnaryOperator::Sinh => value.sinh(),
             UnaryOperator::Sqrt => {
                 if value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::ComplexResult {
+                    return Err(StockTrekError::Stats(StatsError::ComplexResult {
                         operator: "Sqrt",
                         value,
                         relation: "< 0",
