@@ -51,61 +51,60 @@ impl NumberValueTrait for BinaryCalculationValue {
             BinaryOperator::Atan2 => left_value.atan2(right_value),
             BinaryOperator::Div => {
                 if right_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Divide: A divisor =0 is not supported, it would give +/- infinity"
-                            .to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::DivisionByZero {
+                        operator: "Div",
+                    }));
                 }
                 left_value / right_value
             }
             BinaryOperator::Pow => {
                 if left_value < 0.0 && right_value.fract() != 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        format!(
-                        "Power: Combining a base <0 {} with a non-integer exponent {} is not supported, it would give a complex number",
-                        left_value,
-                        right_value,
-                        )
-                    )));
+                    return Err(StockTrekError::General(GeneralError::ComplexPowerResult {
+                        operator: "Pow",
+                        base: left_value,
+                        exponent: right_value,
+                    }));
                 }
                 left_value.powf(right_value)
             }
             BinaryOperator::Log => {
                 if left_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Log: An argument =0 is not supported, it would give undefined".to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                        operator: "Log",
+                        detail: "argument = 0 would produce undefined".to_string(),
+                    }));
                 }
                 if right_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Log: A base =0 is not supported, it would give undefined".to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                        operator: "Log",
+                        detail: "base = 0 would produce undefined".to_string(),
+                    }));
                 }
                 if right_value == 1.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Log: A base =1 is not supported, it would give undefined".to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::UndefinedLogarithm {
+                        operator: "Log",
+                        detail: "base = 1 would produce undefined".to_string(),
+                    }));
                 }
                 if left_value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Log: An argument <0 {} is not supported, it would give a complex number",
-                        left_value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                        operator: "Log",
+                        detail: format!("argument {} < 0 would produce a complex number", left_value),
+                    }));
                 }
                 if right_value < 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(format!(
-                        "Log: A base <0 {} is not supported, it would give a complex number",
-                        right_value
-                    ))));
+                    return Err(StockTrekError::General(GeneralError::ComplexLogarithm {
+                        operator: "Log",
+                        detail: format!("base {} < 0 would produce a complex number", right_value),
+                    }));
                 }
                 left_value.log(right_value)
             }
             BinaryOperator::Mod => {
                 if right_value == 0.0 {
-                    return Err(StockTrekError::General(GeneralError::Message(
-                        "Modulo: A modulus =0 is not supported, it would give undefined"
-                            .to_string(),
-                    )));
+                    return Err(StockTrekError::General(GeneralError::DivisionByZero {
+                        operator: "Mod",
+                    }));
                 }
                 left_value % right_value
             }

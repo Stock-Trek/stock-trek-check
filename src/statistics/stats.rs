@@ -60,7 +60,9 @@ impl Stats {
 
 pub fn mean(values: &[f64]) -> StockTrekResult<f64> {
     if values.is_empty() {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "mean",
+        }));
     }
     let mean = values.iter().sum::<f64>() / values.len() as f64;
     Ok(mean)
@@ -69,11 +71,17 @@ pub fn mean(values: &[f64]) -> StockTrekResult<f64> {
 pub fn variance(values: &[f64], delta_degrees_of_freedom: usize) -> StockTrekResult<f64> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "variance",
+        }));
     }
     if n <= delta_degrees_of_freedom {
         return Err(StockTrekError::Stats(
-            StatsError::InsufficientDegreesOfFreedom,
+            StatsError::InsufficientDegreesOfFreedom {
+                function: "variance",
+                dof: n.saturating_sub(1),
+                needed: delta_degrees_of_freedom,
+            },
         ));
     }
     let mu = stats::mean(values)?;
@@ -97,10 +105,16 @@ pub fn standard_deviation(values: &[f64], delta_degrees_of_freedom: usize) -> St
 pub fn covariance(first: &[f64], second: &[f64]) -> StockTrekResult<f64> {
     let n = first.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "covariance",
+        }));
     }
     if n != second.len() {
-        return Err(StockTrekError::Stats(StatsError::MismatchedLengths));
+        return Err(StockTrekError::Stats(StatsError::MismatchedLengths {
+            function: "covariance",
+            first_len: n,
+            second_len: second.len(),
+        }));
     }
     let mean_x = stats::mean(first)?;
     let mean_y = stats::mean(second)?;
@@ -118,7 +132,10 @@ pub fn correlation(first: &[f64], second: &[f64]) -> StockTrekResult<f64> {
     let std_x = stats::standard_deviation(first, 0)?;
     let std_y = stats::standard_deviation(second, 0)?;
     if std_x == 0.0 || std_y == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::ZeroVariance));
+        return Err(StockTrekError::Stats(StatsError::ZeroVariance {
+            function: "correlation",
+            detail: "one or both series have zero variance".to_string(),
+        }));
     }
     let correlation = cov / (std_x * std_y);
     Ok(correlation)
@@ -127,12 +144,17 @@ pub fn correlation(first: &[f64], second: &[f64]) -> StockTrekResult<f64> {
 pub fn skewness(values: &[f64]) -> StockTrekResult<f64> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "skewness",
+        }));
     }
     let mu = stats::mean(values)?;
     let std = stats::standard_deviation(values, 0)?;
     if std == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::ZeroVariance));
+        return Err(StockTrekError::Stats(StatsError::ZeroVariance {
+            function: "skewness",
+            detail: "standard deviation is zero".to_string(),
+        }));
     }
     let m3: f64 = values
         .iter()
@@ -148,12 +170,17 @@ pub fn skewness(values: &[f64]) -> StockTrekResult<f64> {
 pub fn kurtosis(values: &[f64]) -> StockTrekResult<f64> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "kurtosis",
+        }));
     }
     let mu = stats::mean(values)?;
     let std = stats::standard_deviation(values, 0)?;
     if std == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::ZeroVariance));
+        return Err(StockTrekError::Stats(StatsError::ZeroVariance {
+            function: "kurtosis",
+            detail: "standard deviation is zero".to_string(),
+        }));
     }
     let m4: f64 = values
         .iter()

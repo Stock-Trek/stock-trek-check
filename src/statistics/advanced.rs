@@ -36,7 +36,10 @@ impl Advanced {
 pub fn hurst_exponent(time_series_values: &[f64]) -> StockTrekResult<f64> {
     let n = time_series_values.len();
     if n < 20 {
-        return Err(StockTrekError::Stats(StatsError::InvalidParameters));
+        return Err(StockTrekError::Stats(StatsError::InvalidParameters {
+            function: "hurst_exponent",
+            message: format!("time series has {} elements, need at least 20", n),
+        }));
     }
     let mean = stats::mean(time_series_values)?;
     let mut cumulative = Vec::with_capacity(n);
@@ -50,7 +53,10 @@ pub fn hurst_exponent(time_series_values: &[f64]) -> StockTrekResult<f64> {
     let range = max - min;
     let std = stats::standard_deviation(time_series_values, 0)?;
     if std == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "hurst_exponent",
+            detail: "standard deviation is zero".to_string(),
+        }));
     }
     let rs = range / std;
     Ok(rs.ln() / (n as f64).ln())
@@ -58,10 +64,16 @@ pub fn hurst_exponent(time_series_values: &[f64]) -> StockTrekResult<f64> {
 
 pub fn mutual_information(first_series: &[f64], second_series: &[f64]) -> StockTrekResult<f64> {
     if first_series.len() != second_series.len() {
-        return Err(StockTrekError::Stats(StatsError::MismatchedLengths));
+        return Err(StockTrekError::Stats(StatsError::MismatchedLengths {
+            function: "mutual_information",
+            first_len: first_series.len(),
+            second_len: second_series.len(),
+        }));
     }
     if first_series.is_empty() {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "mutual_information",
+        }));
     }
     let n = first_series.len();
     // simple binning approach
@@ -79,7 +91,11 @@ pub fn mutual_information(first_series: &[f64], second_series: &[f64]) -> StockT
     let width_x = (max_x - min_x) / bins as f64;
     let width_y = (max_y - min_y) / bins as f64;
     if width_x == 0.0 || width_y == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "mutual_information",
+            detail: "bin width is zero; all data points are identical in one or both dimensions"
+                .to_string(),
+        }));
     }
     let mut joint = vec![vec![0.0; bins]; bins];
     let mut px = vec![0.0; bins];
@@ -115,7 +131,13 @@ pub fn sample_entropy(
 ) -> StockTrekResult<f64> {
     let n = time_series_values.len();
     if n <= embedding_dimension + 1 || tolerance <= 0.0 {
-        return Err(StockTrekError::Stats(StatsError::InvalidParameters));
+        return Err(StockTrekError::Stats(StatsError::InvalidParameters {
+            function: "sample_entropy",
+            message: format!(
+                "n={}, embedding_dimension={}, tolerance={}: need n > embedding_dimension + 1 and tolerance > 0",
+                n, embedding_dimension, tolerance
+            ),
+        }));
     }
     let mut count_m = 0.0;
     let mut count_m1 = 0.0;
@@ -147,19 +169,27 @@ pub fn sample_entropy(
         }
     }
     if count_m == 0.0 || count_m1 == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "sample_entropy",
+            detail: "no matching vector pairs found".to_string(),
+        }));
     }
     Ok(-f64::ln(count_m1 / count_m))
 }
 
 pub fn shannon_entropy(probability_distribution: &[f64]) -> StockTrekResult<f64> {
     if probability_distribution.is_empty() {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "shannon_entropy",
+        }));
     }
     let mut entropy = 0.0;
     for &p in probability_distribution {
         if p < 0.0 {
-            return Err(StockTrekError::Stats(StatsError::InvalidParameters));
+            return Err(StockTrekError::Stats(StatsError::InvalidParameters {
+                function: "shannon_entropy",
+                message: format!("negative probability {}", p),
+            }));
         }
         if p > 0.0 {
             entropy -= p * p.ln();

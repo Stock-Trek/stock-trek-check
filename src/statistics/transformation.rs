@@ -42,13 +42,16 @@ impl Transformation {
 
 pub fn box_cox(values: &[f64], lambda: f64) -> StockTrekResult<Vec<f64>> {
     if values.is_empty() {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "box_cox",
+        }));
     }
     let mut result = Vec::with_capacity(values.len());
     for &x in values {
         if x <= 0.0 {
             return Err(StockTrekError::Stats(StatsError::DomainError {
-                message: "Box-Cox requires positive values".into(),
+                function: "box_cox",
+                message: format!("value {} <= 0, Box-Cox requires positive values", x),
             }));
         }
         if lambda == 0.0 {
@@ -63,7 +66,9 @@ pub fn box_cox(values: &[f64], lambda: f64) -> StockTrekResult<Vec<f64>> {
 pub fn detrend_linear(values: &[f64]) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "detrend_linear",
+        }));
     }
     let x: Vec<f64> = (0..n).map(|i| i as f64).collect();
     let mean_x = stats::mean(&x)?;
@@ -81,7 +86,10 @@ pub fn detrend_linear(values: &[f64]) -> StockTrekResult<Vec<f64>> {
         })
         .sum();
     if denominator == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::ZeroVariance));
+        return Err(StockTrekError::Stats(StatsError::ZeroVariance {
+            function: "detrend_linear",
+            detail: "variance of x indices is zero".to_string(),
+        }));
     }
     let slope = numerator / denominator;
     let intercept = mean_y - slope * mean_x;
@@ -96,14 +104,20 @@ pub fn detrend_linear(values: &[f64]) -> StockTrekResult<Vec<f64>> {
 pub fn difference(values: &[f64], order: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "difference",
+        }));
     }
     if order == 0 {
         return Ok(values.to_vec());
     }
     if order >= n {
         return Err(StockTrekError::Stats(
-            StatsError::InsufficientDegreesOfFreedom,
+            StatsError::InsufficientDegreesOfFreedom {
+                function: "difference",
+                dof: n.saturating_sub(1),
+                needed: order,
+            },
         ));
     }
     let mut result = values.to_vec();
@@ -113,17 +127,19 @@ pub fn difference(values: &[f64], order: usize) -> StockTrekResult<Vec<f64>> {
     Ok(result)
 }
 
-pub fn lag(values: &[f64], lag: usize) -> StockTrekResult<Vec<Option<f64>>> {
+pub fn lag(values: &[f64], l: usize) -> StockTrekResult<Vec<Option<f64>>> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "lag",
+        }));
     }
     let mut result = Vec::with_capacity(n);
     for i in 0..n {
-        if i < lag {
+        if i < l {
             result.push(None);
         } else {
-            result.push(Some(values[i - lag]));
+            result.push(Some(values[i - l]));
         }
     }
     Ok(result)
@@ -131,13 +147,16 @@ pub fn lag(values: &[f64], lag: usize) -> StockTrekResult<Vec<Option<f64>>> {
 
 pub fn logarithm(values: &[f64]) -> StockTrekResult<Vec<f64>> {
     if values.is_empty() {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "logarithm",
+        }));
     }
     let mut result = Vec::with_capacity(values.len());
     for &x in values {
         if x <= 0.0 {
             return Err(StockTrekError::Stats(StatsError::DomainError {
-                message: "log undefined for non-positive values".into(),
+                function: "logarithm",
+                message: format!("value {} <= 0, log undefined for non-positive values", x),
             }));
         }
         result.push(x.ln());
@@ -148,10 +167,16 @@ pub fn logarithm(values: &[f64]) -> StockTrekResult<Vec<f64>> {
 pub fn rolling_mean(values: &[f64], window: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "rolling_mean",
+        }));
     }
     if window == 0 || window > n {
-        return Err(StockTrekError::Stats(StatsError::InvalidLag));
+        return Err(StockTrekError::Stats(StatsError::InvalidLag {
+            function: "rolling_mean",
+            lag: window,
+            max_lag: n,
+        }));
     }
     let result: Vec<f64> = values
         .windows(window)
@@ -163,10 +188,16 @@ pub fn rolling_mean(values: &[f64], window: usize) -> StockTrekResult<Vec<f64>> 
 pub fn rolling_standard_deviation(values: &[f64], window: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "rolling_standard_deviation",
+        }));
     }
     if window == 0 || window > n {
-        return Err(StockTrekError::Stats(StatsError::InvalidLag));
+        return Err(StockTrekError::Stats(StatsError::InvalidLag {
+            function: "rolling_standard_deviation",
+            lag: window,
+            max_lag: n,
+        }));
     }
     let mut result = Vec::with_capacity(n - window + 1);
     for w in values.windows(window) {
@@ -179,10 +210,16 @@ pub fn rolling_standard_deviation(values: &[f64], window: usize) -> StockTrekRes
 pub fn seasonal_difference(values: &[f64], period: usize) -> StockTrekResult<Vec<f64>> {
     let n = values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "seasonal_difference",
+        }));
     }
     if period == 0 || period >= n {
-        return Err(StockTrekError::Stats(StatsError::InvalidLag));
+        return Err(StockTrekError::Stats(StatsError::InvalidLag {
+            function: "seasonal_difference",
+            lag: period,
+            max_lag: n,
+        }));
     }
     let result: Vec<f64> = (period..n)
         .map(|i| values[i] - values[i - period])

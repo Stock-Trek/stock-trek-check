@@ -109,7 +109,13 @@ pub fn augmented_dickey_fuller(
 ) -> StockTrekResult<(f64, f64)> {
     let n = time_series_values.len();
     if n <= maximum_lag + 1 {
-        return Err(StockTrekError::Stats(StatsError::InvalidParameters));
+        return Err(StockTrekError::Stats(StatsError::InvalidParameters {
+            function: "augmented_dickey_fuller",
+            message: format!(
+                "n={} <= maximum_lag={} + 1, need more observations",
+                n, maximum_lag
+            ),
+        }));
     }
 
     // Δy_t = y_t - y_{t-1}
@@ -123,7 +129,10 @@ pub fn augmented_dickey_fuller(
     // We start from t = maximum_lag (so we have y_{t-1} and enough lags)
     let eff_n = diff.len() - maximum_lag;
     if eff_n < 1 {
-        return Err(StockTrekError::Stats(StatsError::InvalidParameters));
+        return Err(StockTrekError::Stats(StatsError::InvalidParameters {
+            function: "augmented_dickey_fuller",
+            message: format!("effective n={} after accounting for lags, need at least 1", eff_n),
+        }));
     }
 
     // Build design matrix: [1, y_{t-1}, Δy_{t-1}, Δy_{t-2}, ..., Δy_{t-maximum_lag}]
@@ -185,7 +194,10 @@ pub fn augmented_dickey_fuller(
             }
         }
         if max_val < 1e-15 {
-            return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+            return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+                function: "augmented_dickey_fuller",
+                detail: "singular design matrix in first Gaussian elimination".to_string(),
+            }));
         }
         // Swap rows
         if max_row != i {
@@ -229,7 +241,11 @@ pub fn augmented_dickey_fuller(
 
     let dof = eff_n as f64 - num_regressors as f64;
     if dof <= 0.0 {
-        return Err(StockTrekError::Stats(StatsError::InsufficientDegreesOfFreedom));
+        return Err(StockTrekError::Stats(StatsError::InsufficientDegreesOfFreedom {
+            function: "augmented_dickey_fuller",
+            dof: 0,
+            needed: 1,
+        }));
     }
     let mse = sse / dof;
 
@@ -253,7 +269,10 @@ pub fn augmented_dickey_fuller(
             }
         }
         if max_val < 1e-15 {
-            return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+            return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+                function: "augmented_dickey_fuller",
+                detail: "singular matrix in inverse computation".to_string(),
+            }));
         }
         if max_row != i {
             for k in 0..m {
@@ -279,7 +298,10 @@ pub fn augmented_dickey_fuller(
 
     let se_beta = (mse * inv[m + 1]).sqrt();
     if se_beta == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "augmented_dickey_fuller",
+            detail: "standard error of beta is zero".to_string(),
+        }));
     }
 
     // ADF test statistic: t-statistic for β = 0
@@ -294,7 +316,10 @@ pub fn augmented_dickey_fuller(
 pub fn durbin_watson(residual_values: &[f64]) -> StockTrekResult<f64> {
     let n = residual_values.len();
     if n < 2 {
-        return Err(StockTrekError::Stats(StatsError::InvalidParameters));
+        return Err(StockTrekError::Stats(StatsError::InvalidParameters {
+            function: "durbin_watson",
+            message: format!("need at least 2 residuals, got {}", n),
+        }));
     }
     let mut num = 0.0;
     let mut den = 0.0;
@@ -305,7 +330,10 @@ pub fn durbin_watson(residual_values: &[f64]) -> StockTrekResult<f64> {
         den += e.powi(2);
     }
     if den == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "durbin_watson",
+            detail: "sum of squared residuals is zero".to_string(),
+        }));
     }
     Ok(num / den)
 }
@@ -313,12 +341,17 @@ pub fn durbin_watson(residual_values: &[f64]) -> StockTrekResult<f64> {
 pub fn jarque_bera(time_series_values: &[f64]) -> StockTrekResult<(f64, f64)> {
     let n = time_series_values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "jarque_bera",
+        }));
     }
     let mu = stats::mean(time_series_values)?;
     let var = stats::variance(time_series_values, 0)?;
     if var == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "jarque_bera",
+            detail: "variance is zero".to_string(),
+        }));
     }
     let std = var.sqrt();
     let mut skew = 0.0;
@@ -340,7 +373,9 @@ pub fn kwiatkowski_phillips_schmidt_shin(
 ) -> StockTrekResult<(f64, f64)> {
     let n = time_series_values.len();
     if n == 0 {
-        return Err(StockTrekError::Stats(StatsError::EmptyInput));
+        return Err(StockTrekError::Stats(StatsError::EmptyInput {
+            function: "kwiatkowski_phillips_schmidt_shin",
+        }));
     }
     let mu = stats::mean(time_series_values)?;
     let mut cumulative = Vec::with_capacity(n);
@@ -352,7 +387,10 @@ pub fn kwiatkowski_phillips_schmidt_shin(
     let eta = cumulative.iter().map(|x| x.powi(2)).sum::<f64>() / (n as f64 * n as f64);
     let var = stats::variance(time_series_values, 0)?;
     if var == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "kwiatkowski_phillips_schmidt_shin",
+            detail: "variance is zero".to_string(),
+        }));
     }
     let stat = eta / var;
     let p_value = (-stat).exp();
@@ -362,11 +400,20 @@ pub fn kwiatkowski_phillips_schmidt_shin(
 pub fn ljung_box(time_series_values: &[f64], number_of_lags: usize) -> StockTrekResult<f64> {
     let n = time_series_values.len();
     if n == 0 || number_of_lags == 0 || number_of_lags >= n {
-        return Err(StockTrekError::Stats(StatsError::InvalidParameters));
+        return Err(StockTrekError::Stats(StatsError::InvalidParameters {
+            function: "ljung_box",
+            message: format!(
+                "n={}, number_of_lags={}: need n > 0, lags > 0, and lags < n",
+                n, number_of_lags
+            ),
+        }));
     }
     let var = stats::variance(time_series_values, 0)?;
     if var == 0.0 {
-        return Err(StockTrekError::Stats(StatsError::DivisionByZero));
+        return Err(StockTrekError::Stats(StatsError::DivisionByZero {
+            function: "ljung_box",
+            detail: "variance is zero".to_string(),
+        }));
     }
     let mut q = 0.0;
     for k in 1..=number_of_lags {
