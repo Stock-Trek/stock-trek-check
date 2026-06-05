@@ -119,41 +119,37 @@ pub fn sample_entropy(
     }
     let mut count_m = 0.0;
     let mut count_m1 = 0.0;
+    // i can only go up to n - embedding_dimension - 1 to leave room for the m+1 check
     for i in 0..(n - embedding_dimension) {
-        for j in (i + 1)..(n - embedding_dimension) {
+        // j must go up to n - embedding_dimension to include all valid m-vectors
+        for j in (i + 1)..(n - embedding_dimension + 1) {
+            // Check if m-dimensional vectors match (Chebyshev distance)
             let mut match_m = true;
-            let mut match_m1 = true;
             for k in 0..embedding_dimension {
                 if (time_series_values[i + k] - time_series_values[j + k]).abs() > tolerance {
                     match_m = false;
                     break;
                 }
             }
-            if match_m {
-                count_m += 1.0;
-                if (time_series_values[i + embedding_dimension]
-                    - time_series_values[j + embedding_dimension])
-                    .abs()
-                    <= tolerance
-                {
-                    count_m1 += 1.0;
-                } else {
-                    match_m1 = false;
-                }
-            }
             if !match_m {
                 continue;
             }
-            if !match_m1 {
-                continue;
+            count_m += 1.0;
+            // Only check the (m+1)th dimension if j also has room for it
+            if j < n - embedding_dimension
+                && (time_series_values[i + embedding_dimension]
+                    - time_series_values[j + embedding_dimension])
+                    .abs()
+                    <= tolerance
+            {
+                count_m1 += 1.0;
             }
         }
     }
     if count_m == 0.0 || count_m1 == 0.0 {
         return Err(StockTrekError::Stats(StatsError::DivisionByZero));
     }
-    let div: f64 = -(count_m1 / count_m);
-    Ok(div.ln())
+    Ok(-f64::ln(count_m1 / count_m))
 }
 
 pub fn shannon_entropy(probability_distribution: &[f64]) -> StockTrekResult<f64> {
