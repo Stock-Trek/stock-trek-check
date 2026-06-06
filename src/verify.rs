@@ -5,7 +5,7 @@ use crate::{
     path_util::{collate, path_string},
     policy::{BlockedLocations, SyntaxPolicy},
     syntax_verifier::SyntaxVerifier,
-    verifier_map::{blocked_node_policy, node_to_location, rust_node, VerifierMap},
+    verifier_map::{VerifierMap, blocked_node_policy, node_to_location, rust_node},
 };
 
 pub fn verify(path: String) -> Result<(), VerificationError> {

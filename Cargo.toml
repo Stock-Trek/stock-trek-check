@@ -1,18 +1,18 @@
 [package]
 name = "stock-trek-check"
-version = "0.1.0"
-edition = "2021"
+version = "0.1.1"
+edition = "2024"
 description = "Code verification for Stock-Trek algorithms"
 authors = ["stock-trek.com <stock-trek@proton.me>"]
 license = "MIT"
 repository = "https://github.com/Stock-Trek/stock-trek-check"
 readme = "README.md"
-categories = ["finance", "mathematics"]
 keywords = [
-  "indicators",
-  "ohlcv",
-  "statistics",
-  "timeseries",
+  "code-checker",
+  "linter",
+  "static-analysis",
+  "syntax-checker",
+  "verification"
 ]
 
 [[bin]]

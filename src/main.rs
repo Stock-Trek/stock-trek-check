@@ -5,7 +5,7 @@ use stock_trek_check::verify::verify;
 #[derive(Command)]
 #[larpa(
     name = "stock-trek-check",
-    version = "0.1.0",
+    version = "0.1.1",
     homepage = "https://github.com/Stock-Trek/stock-trek-check",
     license = "MIT",
     repository = "https://github.com/Stock-Trek/stock-trek-check"

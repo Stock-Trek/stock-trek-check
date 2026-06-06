@@ -70,12 +70,10 @@ impl VerifierMap {
     }
     pub fn verify_node<N: Spanned + 'static>(&mut self, node: &N) -> SyntaxPolicy {
         let node_name = self.node_type_name::<N>();
-        let policy = self
-            .verifiers
+        self.verifiers
             .get(node_name)
             .map(|f| f(node))
-            .unwrap_or(blocked_node_policy(node));
-        policy
+            .unwrap_or(blocked_node_policy(node))
     }
 }
 

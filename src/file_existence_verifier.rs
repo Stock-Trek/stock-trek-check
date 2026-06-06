@@ -1,4 +1,4 @@
-use crate::error::{VerificationError, NO_SUCH_FILE};
+use crate::error::{NO_SUCH_FILE, VerificationError};
 
 pub struct FileExistenceVerifier;
 

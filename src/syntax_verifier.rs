@@ -1,5 +1,5 @@
 use crate::{
-    error::{VerificationError, BLOCKED_SYNTAX_ERROR, PARSE_ERROR},
+    error::{BLOCKED_SYNTAX_ERROR, PARSE_ERROR, VerificationError},
     node_location::NodeLocation,
     policy::SyntaxPolicy,
     verifier_map::VerifierMap,
