@@ -1,4 +1,4 @@
-use crate::verification::node_location::NodeLocation;
+use crate::node_location::NodeLocation;
 use strum::Display;
 
 #[derive(Debug, Display, Clone)]

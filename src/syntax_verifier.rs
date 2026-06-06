@@ -1,9 +1,8 @@
 use crate::{
-    error::{
-        result::{StockTrekError, StockTrekResult},
-        verification::{VerificationError, BLOCKED_SYNTAX_ERROR, PARSE_ERROR},
-    },
-    verification::{node_location::NodeLocation, policy::SyntaxPolicy, verifier_map::VerifierMap},
+    error::{VerificationError, BLOCKED_SYNTAX_ERROR, PARSE_ERROR},
+    node_location::NodeLocation,
+    policy::SyntaxPolicy,
+    verifier_map::VerifierMap,
 };
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -19,12 +18,12 @@ impl SyntaxVerifier {
             blocked_node_locations: BTreeMap::new(),
         }
     }
-    pub fn verify(&mut self, code: &str) -> StockTrekResult<()> {
+    pub fn verify(&mut self, code: &str) -> Result<(), VerificationError> {
         match syn::parse_file(code) {
-            Err(e) => Err(StockTrekError::Verification(VerificationError {
+            Err(e) => Err(VerificationError {
                 exit_code: PARSE_ERROR,
                 errors: vec![format!("Error when parsing code: {}", e)],
-            })),
+            }),
             Ok(ast) => {
                 syn::visit::Visit::visit_file(self, &ast);
                 // let blocked_node_locations = self.verifiers.blocked_node_locations();
@@ -49,10 +48,10 @@ impl SyntaxVerifier {
                             )
                         })
                         .collect();
-                    Err(StockTrekError::Verification(VerificationError {
+                    Err(VerificationError {
                         exit_code: BLOCKED_SYNTAX_ERROR,
                         errors,
-                    }))
+                    })
                 }
             }
         }

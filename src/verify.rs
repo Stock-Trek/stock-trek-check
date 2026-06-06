@@ -1,16 +1,14 @@
 use crate::{
-    error::result::StockTrekResult,
-    verification::{
-        file_existence_verifier::FileExistenceVerifier,
-        node_location::NodeLocation,
-        path_util::{collate, path_string},
-        policy::{BlockedLocations, SyntaxPolicy},
-        syntax_verifier::SyntaxVerifier,
-        verifier_map::{blocked_node_policy, node_to_location, rust_node, VerifierMap},
-    },
+    error::VerificationError,
+    file_existence_verifier::FileExistenceVerifier,
+    node_location::NodeLocation,
+    path_util::{collate, path_string},
+    policy::{BlockedLocations, SyntaxPolicy},
+    syntax_verifier::SyntaxVerifier,
+    verifier_map::{blocked_node_policy, node_to_location, rust_node, VerifierMap},
 };
 
-pub fn verify(path: String) -> StockTrekResult<()> {
+pub fn verify(path: String) -> Result<(), VerificationError> {
     let file_existence_verifier = FileExistenceVerifier::new();
     match file_existence_verifier.verify(path) {
         Err(e) => Err(e),

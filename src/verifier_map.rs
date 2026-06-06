@@ -1,4 +1,4 @@
-use crate::verification::{
+use crate::{
     node_location::NodeLocation,
     path_util::last_segment_name,
     policy::{BlockedLocations, SyntaxPolicy},

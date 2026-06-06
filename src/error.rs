@@ -1,13 +1,11 @@
-use std::fmt;
-
 #[derive(Debug)]
 pub struct VerificationError {
     pub exit_code: u8,
     pub errors: Vec<String>,
 }
 
-impl fmt::Display for VerificationError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for VerificationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Verification failed (exit code {}): ", self.exit_code)?;
         if self.errors.is_empty() {
             write!(f, "no error details available")?;
