@@ -27,6 +27,8 @@ const ALLOWED_PATH_PREFIXES: &[&str] = &[
     "self::",
     "std::collections::",
     "stock_trek::",
+    "ta::",
+    "yata::",
 ];
 
 fn allowed_by_prefix(path_str: &str) -> bool {

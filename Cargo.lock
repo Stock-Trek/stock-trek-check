@@ -48,7 +48,7 @@ dependencies = [
 
 [[package]]
 name = "stock-trek-check"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "larpa",
  "proc-macro2",
