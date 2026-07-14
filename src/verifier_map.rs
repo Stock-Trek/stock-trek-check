@@ -4,7 +4,8 @@ use crate::{
     policy::{BlockedLocations, SyntaxPolicy},
     verifier_map::rust_node::*,
 };
-use std::{any::Any, collections::HashMap};
+use hashbrown::HashMap;
+use std::any::Any;
 use syn::spanned::Spanned;
 
 pub trait SyntaxVariant {
