@@ -39,6 +39,18 @@ fn allowed_by_prefix(path_str: &str) -> bool {
         .any(|&p| path_str.starts_with(p))
 }
 
+fn is_allowed_attribute(attribute: &syn::Attribute) -> bool {
+    if !attribute.path().is_ident(ALLOWED_ATTRIBUTE_PATH) {
+        return false;
+    }
+    match &attribute.meta {
+        syn::Meta::List(list) => list
+            .parse_args::<syn::Ident>()
+            .is_ok_and(|argument| argument == "default"),
+        _ => false,
+    }
+}
+
 fn syntax_verifier() -> SyntaxVerifier {
     let mut verifiers = VerifierMap::new();
     verifiers
@@ -189,11 +201,7 @@ fn syntax_verifier() -> SyntaxVerifier {
 
     verifiers
         .scope::<rust_node::Attribute>(|node| {
-            let is_allowed = match &node.meta {
-                syn::Meta::Path(path) => ALLOWED_ATTRIBUTE_PATH == path_string(path),
-                _ => false,
-            };
-            if is_allowed {
+            if is_allowed_attribute(node) {
                 SyntaxPolicy::Allowed
             } else {
                 blocked_node_policy(node)
@@ -261,4 +269,44 @@ fn syntax_verifier() -> SyntaxVerifier {
         .block::<rust_node::Variadic>();
 
     SyntaxVerifier::new(verifiers)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{is_allowed_attribute, syntax_verifier};
+
+    #[test]
+    fn accepts_register_algorithm_default_attribute() {
+        let attribute: syn::Attribute = syn::parse_quote!(#[register_algorithm(default)]);
+        assert!(is_allowed_attribute(&attribute));
+
+        let mut verifier = syntax_verifier();
+        let code = "#[register_algorithm(default)]\npub struct Algorithm;";
+        assert!(verifier.verify(code).is_ok());
+    }
+
+    #[test]
+    fn rejects_other_attributes() {
+        for source in [
+            "#[register_algorithm]",
+            "#[register_algorithm(other)]",
+            "#[register_algorithm = \"default\"]",
+            "#[other]",
+            "#[other(default)]",
+        ] {
+            let code = format!("{}\npub struct Algorithm;", source);
+            let item: syn::ItemStruct = syn::parse_str(&code).expect("test attribute should parse");
+            let attribute = item.attrs.first().expect("test attribute should exist");
+            assert!(
+                !is_allowed_attribute(attribute),
+                "{source} should be rejected"
+            );
+
+            let mut verifier = syntax_verifier();
+            assert!(
+                verifier.verify(&code).is_err(),
+                "{source} should be rejected"
+            );
+        }
+    }
 }
