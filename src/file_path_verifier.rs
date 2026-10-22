@@ -1,4 +1,4 @@
-use crate::error::{INVALID_FILE_PATH, VerificationError};
+use crate::error::{BUILD_RS_FILE, INVALID_FILE_EXTENSION, VerificationError};
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -13,13 +13,13 @@ impl FilePathVerifier {
         let file_path = Path::new(path);
         if file_path.extension() != Some(OsStr::new("rs")) {
             return Err(VerificationError {
-                exit_code: INVALID_FILE_PATH,
+                exit_code: INVALID_FILE_EXTENSION,
                 errors: vec![format!("File path must have an .rs extension: {}", path)],
             });
         }
         if file_path.file_name() == Some(OsStr::new("build.rs")) {
             return Err(VerificationError {
-                exit_code: INVALID_FILE_PATH,
+                exit_code: BUILD_RS_FILE,
                 errors: vec![format!("File path must not be build.rs: {}", path)],
             });
         }
@@ -36,7 +36,7 @@ impl Default for FilePathVerifier {
 #[cfg(test)]
 mod tests {
     use super::FilePathVerifier;
-    use crate::error::INVALID_FILE_PATH;
+    use crate::error::{BUILD_RS_FILE, INVALID_FILE_EXTENSION};
 
     #[test]
     fn accepts_rs_extension() {
@@ -55,7 +55,7 @@ mod tests {
             "algorithm.RS",
         ] {
             let error = verifier.verify(path).unwrap_err();
-            assert_eq!(error.exit_code, INVALID_FILE_PATH);
+            assert_eq!(error.exit_code, INVALID_FILE_EXTENSION);
         }
     }
 
@@ -64,7 +64,7 @@ mod tests {
         let verifier = FilePathVerifier::new();
         for path in ["build.rs", "algorithms/build.rs", "./build.rs"] {
             let error = verifier.verify(path).unwrap_err();
-            assert_eq!(error.exit_code, INVALID_FILE_PATH);
+            assert_eq!(error.exit_code, BUILD_RS_FILE);
         }
     }
 }

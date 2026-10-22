@@ -26,4 +26,5 @@ impl std::error::Error for VerificationError {}
 pub const NO_SUCH_FILE: u8 = 1;
 pub const PARSE_ERROR: u8 = 2;
 pub const BLOCKED_SYNTAX_ERROR: u8 = 3;
-pub const INVALID_FILE_PATH: u8 = 4;
+pub const INVALID_FILE_EXTENSION: u8 = 4;
+pub const BUILD_RS_FILE: u8 = 5;
