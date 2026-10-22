@@ -1,5 +1,6 @@
 pub mod error;
 pub mod file_existence_verifier;
+pub mod file_path_verifier;
 pub mod node_location;
 pub mod path_util;
 pub mod policy;

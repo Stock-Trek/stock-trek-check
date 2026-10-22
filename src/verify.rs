@@ -1,6 +1,7 @@
 use crate::{
     error::VerificationError,
     file_existence_verifier::FileExistenceVerifier,
+    file_path_verifier::FilePathVerifier,
     node_location::NodeLocation,
     path_util::{collate, path_string},
     policy::{BlockedLocations, SyntaxPolicy},
@@ -9,6 +10,7 @@ use crate::{
 };
 
 pub fn verify(path: String) -> Result<(), VerificationError> {
+    FilePathVerifier::new().verify(&path)?;
     let file_existence_verifier = FileExistenceVerifier::new();
     match file_existence_verifier.verify(path) {
         Err(e) => Err(e),
