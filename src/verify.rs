@@ -27,6 +27,7 @@ const ALLOWED_PATH_PREFIXES: &[&str] = &[
     "crate::",
     "super::",
     "self::",
+    "std::cmp::",
     "std::collections::",
     "stock_trek::",
     "ta::",
@@ -191,8 +192,18 @@ fn syntax_verifier() -> SyntaxVerifier {
         .allow::<rust_node::WherePredicate>();
     //
 
-    fn verify_node_path<N: syn::spanned::Spanned>(node: &N, path: &str) -> SyntaxPolicy {
-        if allowed_by_prefix(path) || !path.contains("::") {
+    fn verify_node_path<N: syn::spanned::Spanned>(node: &N, path: &syn::Path) -> SyntaxPolicy {
+        let path_str = &path_string(path);
+        let has_type_root = path.leading_colon.is_none()
+            && path.segments.first().is_some_and(|segment| {
+                segment
+                    .ident
+                    .to_string()
+                    .chars()
+                    .next()
+                    .is_some_and(char::is_uppercase)
+            });
+        if allowed_by_prefix(path_str) || !path_str.contains("::") || has_type_root {
             SyntaxPolicy::Allowed
         } else {
             blocked_node_policy(node)
@@ -207,14 +218,8 @@ fn syntax_verifier() -> SyntaxVerifier {
                 blocked_node_policy(node)
             }
         })
-        .scope::<rust_node::ExprPath>(|node| {
-            let expr_path_str = &path_string(&node.path);
-            verify_node_path(node, expr_path_str)
-        })
-        .scope::<rust_node::Path>(|node| {
-            let path_str = &path_string(node);
-            verify_node_path(node, path_str)
-        })
+        .scope::<rust_node::ExprPath>(|node| verify_node_path(node, &node.path))
+        .scope::<rust_node::Path>(|node| verify_node_path(node, node))
         .scope::<rust_node::ItemUse>(|node| {
             let locations: Vec<NodeLocation> = collate(&node.tree)
                 .iter()
@@ -283,6 +288,39 @@ mod tests {
         let mut verifier = syntax_verifier();
         let code = "#[register_algorithm(default)]\npub struct Algorithm;";
         assert!(verifier.verify(code).is_ok());
+    }
+
+    #[test]
+    fn accepts_associated_item_paths() {
+        let mut verifier = syntax_verifier();
+        let code = r#"
+use stock_trek::types::Side;
+
+fn side() -> Side {
+    Side::Buy
+}
+"#;
+        assert!(verifier.verify(code).is_ok());
+    }
+
+    #[test]
+    fn accepts_std_cmp_paths() {
+        let mut verifier = syntax_verifier();
+        let code = r#"
+use std::cmp::Ordering;
+
+fn ordering() -> Ordering {
+    Ordering::Greater
+}
+"#;
+        assert!(verifier.verify(code).is_ok());
+    }
+
+    #[test]
+    fn rejects_unknown_crate_paths() {
+        let mut verifier = syntax_verifier();
+        let code = "use rand::Rng;";
+        assert!(verifier.verify(code).is_err());
     }
 
     #[test]
