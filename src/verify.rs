@@ -8,14 +8,16 @@ use crate::{
     syntax_verifier::SyntaxVerifier,
     verifier_map::{VerifierMap, blocked_node_policy, node_to_location, rust_node},
 };
+use std::ffi::OsStr;
+use std::path::Path;
 
 pub fn verify(path: String) -> Result<(), VerificationError> {
     FilePathVerifier::new().verify(&path)?;
     let file_existence_verifier = FileExistenceVerifier::new();
-    match file_existence_verifier.verify(path) {
+    match file_existence_verifier.verify(path.clone()) {
         Err(e) => Err(e),
         Ok(contents) => {
-            let mut syntax_verifier = syntax_verifier();
+            let mut syntax_verifier = syntax_verifier(&path);
             syntax_verifier.verify(&contents)
         }
     }
@@ -52,7 +54,16 @@ fn is_allowed_attribute(attribute: &syn::Attribute) -> bool {
     }
 }
 
-fn syntax_verifier() -> SyntaxVerifier {
+fn is_mod_rs(path: &str) -> bool {
+    Path::new(path).file_name() == Some(OsStr::new("mod.rs"))
+}
+
+fn is_allowed_mod_statement(node: &syn::ItemMod) -> bool {
+    node.unsafety.is_none() && node.content.is_none()
+}
+
+fn syntax_verifier(path: &str) -> SyntaxVerifier {
+    let is_mod_rs = is_mod_rs(path);
     let mut verifiers = VerifierMap::new();
     verifiers
         .allow::<rust_node::AngleBracketedGenericArguments>()
@@ -220,6 +231,13 @@ fn syntax_verifier() -> SyntaxVerifier {
         })
         .scope::<rust_node::ExprPath>(|node| verify_node_path(node, &node.path))
         .scope::<rust_node::Path>(|node| verify_node_path(node, node))
+        .scope::<rust_node::ItemMod>(move |node| {
+            if is_mod_rs && is_allowed_mod_statement(node) {
+                SyntaxPolicy::Allowed
+            } else {
+                blocked_node_policy(node)
+            }
+        })
         .scope::<rust_node::ItemUse>(|node| {
             let locations: Vec<NodeLocation> = collate(&node.tree)
                 .iter()
@@ -258,7 +276,6 @@ fn syntax_verifier() -> SyntaxVerifier {
         .block::<rust_node::ItemExternCrate>()
         .block::<rust_node::ItemForeignMod>()
         .block::<rust_node::ItemMacro>()
-        .block::<rust_node::ItemMod>()
         .block::<rust_node::ItemStatic>()
         .block::<rust_node::Macro>()
         .block::<rust_node::PointerMutability>()
@@ -285,14 +302,14 @@ mod tests {
         let attribute: syn::Attribute = syn::parse_quote!(#[register_algorithm(default)]);
         assert!(is_allowed_attribute(&attribute));
 
-        let mut verifier = syntax_verifier();
+        let mut verifier = syntax_verifier("algorithm.rs");
         let code = "#[register_algorithm(default)]\npub struct Algorithm;";
         assert!(verifier.verify(code).is_ok());
     }
 
     #[test]
     fn accepts_associated_item_paths() {
-        let mut verifier = syntax_verifier();
+        let mut verifier = syntax_verifier("algorithm.rs");
         let code = r#"
 use stock_trek::types::Side;
 
@@ -305,7 +322,7 @@ fn side() -> Side {
 
     #[test]
     fn accepts_std_cmp_paths() {
-        let mut verifier = syntax_verifier();
+        let mut verifier = syntax_verifier("algorithm.rs");
         let code = r#"
 use std::cmp::Ordering;
 
@@ -318,9 +335,30 @@ fn ordering() -> Ordering {
 
     #[test]
     fn rejects_unknown_crate_paths() {
-        let mut verifier = syntax_verifier();
+        let mut verifier = syntax_verifier("algorithm.rs");
         let code = "use rand::Rng;";
         assert!(verifier.verify(code).is_err());
+    }
+
+    #[test]
+    fn accepts_empty_mod_statements_in_mod_rs() {
+        let mut verifier = syntax_verifier("src/mod.rs");
+        assert!(verifier.verify("mod abc;").is_ok());
+        assert!(verifier.verify("pub mod abc;").is_ok());
+    }
+
+    #[test]
+    fn rejects_mod_statements_outside_mod_rs() {
+        let mut verifier = syntax_verifier("src/algorithm.rs");
+        assert!(verifier.verify("mod abc;").is_err());
+    }
+
+    #[test]
+    fn rejects_unsafe_or_block_mod_statements_in_mod_rs() {
+        for code in ["unsafe mod abc;", "mod abc {}", "mod abc { fn f() {} }"] {
+            let mut verifier = syntax_verifier("src/mod.rs");
+            assert!(verifier.verify(code).is_err(), "{code} should be rejected");
+        }
     }
 
     #[test]
@@ -340,7 +378,7 @@ fn ordering() -> Ordering {
                 "{source} should be rejected"
             );
 
-            let mut verifier = syntax_verifier();
+            let mut verifier = syntax_verifier("algorithm.rs");
             assert!(
                 verifier.verify(&code).is_err(),
                 "{source} should be rejected"
