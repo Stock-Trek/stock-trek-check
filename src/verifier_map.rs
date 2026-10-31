@@ -10,7 +10,6 @@ use syn::spanned::Spanned;
 
 pub trait SyntaxVariant {
     type SynType: Spanned + 'static;
-    const ELEMENT: SyntaxElement;
 }
 
 type VerifierFn = Box<dyn Fn(&dyn Any) -> SyntaxPolicy>;
@@ -95,11 +94,6 @@ pub fn node_to_location<T: Spanned>(node: &T) -> NodeLocation {
 macro_rules! syntax_elements {
     ($($variant:ident => $syn:ty),* $(,)?) => {
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-        pub enum SyntaxElement {
-            $($variant),*
-        }
-
         pub mod rust_node {
             $(
                 #[derive(Debug, Clone, Copy)]
@@ -110,7 +104,6 @@ macro_rules! syntax_elements {
         $(
             impl SyntaxVariant for $variant {
                 type SynType = $syn;
-                const ELEMENT: SyntaxElement = SyntaxElement::$variant;
             }
         )*
     };

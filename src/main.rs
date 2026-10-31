@@ -1,6 +1,6 @@
 use larpa::Command;
 use std::process::ExitCode;
-use stock_trek_check::verify::verify;
+use stock_trek_check::verify;
 
 #[derive(Command)]
 #[larpa(
